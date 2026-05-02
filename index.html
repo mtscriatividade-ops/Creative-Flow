@@ -2999,9 +2999,24 @@ function applyProfile() {
   r.style.setProperty('--accent-dim',  profile.dim);
   r.style.setProperty('--accent-dim2', profile.dim2);
 
+  updateFavicon(profile.accent);
+
   document.querySelectorAll('.av-me').forEach(el => {
     if (!el.querySelector('img')) el.textContent = initials;
   });
+}
+
+function updateFavicon(color) {
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='${color}'/><text x='16' y='23' font-family='system-ui,sans-serif' font-size='20' font-weight='800' fill='white' text-anchor='middle'>G</text></svg>`;
+  const encoded = 'data:image/svg+xml,' + encodeURIComponent(svg);
+  let link = document.querySelector("link[rel='icon']");
+  if (!link) {
+    link = document.createElement('link');
+    link.rel = 'icon';
+    link.type = 'image/svg+xml';
+    document.head.appendChild(link);
+  }
+  link.href = encoded;
 }
 
 function toggleProfile(e) {
