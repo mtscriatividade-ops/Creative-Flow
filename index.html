@@ -1543,7 +1543,7 @@ const TYPE_CLASS = {
 };
 const URG_CLASS = { 'Alta': 'tag-urg-a', 'Média': 'tag-urg-m', 'Baixa': 'tag-urg-b' };
 
-let tasks = [
+const DEFAULT_TASKS = [
   { id:1, title:'Banner Black Friday', brief:'Banner principal para divulgação da campanha. Fundo escuro com elementos vibrantes.', types:['Social media'], urg:'Média', prazo:'2026-05-05', valor:'180,00', colId:0, cliente:'Marca X', drive:'', comments:[], tags:['campanha'], rev:0, prog:10, paid:false, created:'30 abr 2026' },
   { id:2, title:'Carrossel produto novo', brief:'Cliente quer carrossel de 6 slides. Paleta verde + branco.', types:['Carrossel'], urg:'Alta', prazo:'2026-05-01', valor:'250,00', colId:0, cliente:'Marca Verde', drive:'https://drive.google.com/drive/folders/exemplo', comments:[{av:'CL',name:'Cliente',text:'Referência: estilo do março com sombra sutil.',mine:false,time:'ontem 14:32'},{av:'VC',name:'Você',text:'Entendido! Confirmo a paleta amanhã.',mine:true,time:'ontem 15:10'}], tags:['lançamento','produto'], rev:1, prog:35, paid:false, created:'29 abr 2026' },
   { id:3, title:'Pack stories lançamento', brief:'Pack com 5 stories animados para lançamento de produto.', types:['Story'], urg:'Baixa', prazo:'2026-05-08', valor:'120,00', colId:0, cliente:'Startup XY', drive:'', comments:[], tags:[], rev:0, prog:0, paid:false, created:'01 mai 2026' },
@@ -1558,7 +1558,36 @@ let tasks = [
   { id:12, title:'Reels depoimento cliente', brief:'Edição de vídeo com depoimento + legendas animadas.', types:['Reels'], urg:'Baixa', prazo:'2026-05-10', valor:'350,00', colId:0, cliente:'Corp LTDA', drive:'', comments:[], tags:['depoimento'], rev:0, prog:0, paid:false, created:'01 mai 2026' },
 ];
 
+// ── PERSISTÊNCIA localStorage ──
+const STORAGE_KEY = 'creativeflow_tasks';
+const STORAGE_ID_KEY = 'creativeflow_nextId';
+
+function saveTasks() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    localStorage.setItem(STORAGE_ID_KEY, nextId);
+  } catch(e) { console.warn('Não foi possível salvar:', e); }
+}
+
+function loadTasks() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const savedId = localStorage.getItem(STORAGE_ID_KEY);
+    if (saved) {
+      tasks = JSON.parse(saved);
+      nextId = savedId ? parseInt(savedId) : (Math.max(...tasks.map(t => t.id), 0) + 1);
+      return;
+    }
+  } catch(e) { console.warn('Erro ao carregar dados:', e); }
+  // Primeira vez: carrega dados de exemplo
+  tasks = JSON.parse(JSON.stringify(DEFAULT_TASKS));
+  nextId = 13;
+  saveTasks();
+}
+
+let tasks = [];
 let nextId = 13;
+loadTasks();
 let currentTaskId = null;
 let revCount = 0;
 let paid = false;
@@ -1685,6 +1714,7 @@ function initKanbanDrop() {
       const task = tasks.find(t => t.id === taskId);
       if (task && task.colId !== colId) {
         task.colId = colId;
+        saveTasks();
         renderKanban();
         if (currentView === 'lista') renderList();
         showToast(`Movido para "${COLS[colId].name}"`);
@@ -1804,6 +1834,7 @@ function saveTask() {
   const col = COLS.find(c => c.name === sLabel);
   if (col) t.colId = col.id;
   closeDetail();
+  saveTasks();
   renderKanban();
   if (currentView === 'lista') renderList();
   if (currentView === 'financeiro') renderFinanceiro();
@@ -1814,6 +1845,7 @@ function deleteTask() {
   if (!currentTaskId) return;
   tasks = tasks.filter(x => x.id !== currentTaskId);
   closeDetail();
+  saveTasks();
   renderKanban();
   if (currentView === 'lista') renderList();
   if (currentView === 'financeiro') renderFinanceiro();
@@ -1864,6 +1896,7 @@ function createTask() {
     created,
   });
   closeNew();
+  saveTasks();
   renderKanban();
   showToast('Demanda criada!');
 }
@@ -2061,6 +2094,7 @@ function renderList() {
       const task = tasks.find(t => t.id === taskId);
       if (task && task.colId !== col.id) {
         task.colId = col.id;
+        saveTasks();
         renderList();
         updateStats();
         showToast(`Movido para "${col.name}"`);
@@ -2131,6 +2165,7 @@ function renderList() {
           const task = tasks.find(x => x.id === t.id);
           if (task) {
             task.colId = newColId;
+            saveTasks();
             renderList();
             updateStats();
             showToast(`Movido para "${COLS[newColId].name}"`);
@@ -2426,6 +2461,7 @@ function markPaid(id) {
   const t = tasks.find(x => x.id === id);
   if (t) {
     t.paid = true;
+    saveTasks();
     renderFinanceiro();
     updateStats();
     showToast('Pagamento confirmado!');
