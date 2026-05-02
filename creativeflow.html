@@ -1,0 +1,2444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CreativeFlow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&family=Funnel+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg0: #0a0a0b;
+  --bg1: #111114;
+  --bg2: #18181d;
+  --bg3: #1f1f26;
+  --bg4: #26262f;
+  --bg5: #2e2e38;
+  --line: rgba(255,255,255,0.07);
+  --line2: rgba(255,255,255,0.12);
+  --text0: #f0f0f5;
+  --text1: #b8b8c8;
+  --text2: #72728a;
+  --text3: #48485a;
+  --accent: #7c6dfa;
+  --accent2: #a594ff;
+  --accent-dim: rgba(124,109,250,0.15);
+  --accent-dim2: rgba(124,109,250,0.08);
+  --green: #3ecf8e;
+  --green-dim: rgba(62,207,142,0.12);
+  --red: #f46a6a;
+  --red-dim: rgba(244,106,106,0.12);
+  --amber: #f5a623;
+  --amber-dim: rgba(245,166,35,0.12);
+  --blue: #4a9eff;
+  --blue-dim: rgba(74,158,255,0.12);
+  --pink: #e879a0;
+  --pink-dim: rgba(232,121,160,0.12);
+  --teal: #2dd4bf;
+  --teal-dim: rgba(45,212,191,0.12);
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 18px;
+  --font-display: 'Funnel Display', sans-serif;
+  --font-body: 'Funnel Sans', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg0);
+  color: var(--text0);
+  min-height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+input, textarea, select, button { font-family: var(--font-body); }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg5); border-radius: 99px; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: var(--bg1);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  position: relative;
+  z-index: 10;
+}
+.sidebar-logo {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.logo-mark {
+  width: 28px;
+  height: 28px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 13px;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+.logo-text {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text0);
+  letter-spacing: -0.3px;
+}
+.logo-text span { color: var(--accent2); }
+.sidebar-section {
+  padding: 14px 10px 6px;
+}
+.sidebar-section-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text3);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 0 8px;
+  margin-bottom: 4px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text2);
+  transition: all .15s;
+  position: relative;
+}
+.nav-item:hover { background: var(--bg3); color: var(--text1); }
+.nav-item.active { background: var(--accent-dim2); color: var(--accent2); }
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: var(--accent);
+  border-radius: 0 3px 3px 0;
+}
+.nav-icon { width: 16px; height: 16px; flex-shrink: 0; opacity: .7; }
+.nav-item.active .nav-icon { opacity: 1; }
+.nav-badge {
+  margin-left: auto;
+  font-size: 10px;
+  background: var(--accent-dim);
+  color: var(--accent2);
+  padding: 1px 7px;
+  border-radius: 99px;
+  font-weight: 500;
+}
+.nav-badge.red { background: var(--red-dim); color: var(--red); }
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 12px 10px;
+  border-top: 1px solid var(--line);
+}
+.user-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+}
+.user-row:hover { background: var(--bg3); }
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent2);
+  flex-shrink: 0;
+}
+.user-name { font-size: 12px; font-weight: 500; color: var(--text1); }
+.user-role { font-size: 10px; color: var(--text3); }
+
+/* ── MAIN ── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  height: 56px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  padding: 0 22px;
+  gap: 12px;
+  background: var(--bg0);
+  flex-shrink: 0;
+}
+.topbar-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text0);
+  letter-spacing: -0.3px;
+}
+.topbar-subtitle {
+  font-size: 12px;
+  color: var(--text3);
+  margin-left: 2px;
+}
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.filter-select {
+  background: var(--bg2);
+  border: 1px solid var(--line2);
+  border-radius: var(--r-md);
+  color: var(--text1);
+  font-size: 12px;
+  padding: 6px 10px;
+  cursor: pointer;
+  outline: none;
+}
+.filter-select:focus { border-color: var(--accent); }
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-md);
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background .15s, transform .1s;
+  font-family: var(--font-body);
+}
+.btn-primary:hover { background: #6a5ce8; }
+.btn-primary:active { transform: scale(.97); }
+
+/* ── STATS ── */
+.stats-row {
+  display: flex;
+  gap: 1px;
+  background: var(--line);
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.stat-card {
+  flex: 1;
+  background: var(--bg0);
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.stat-label { font-size: 11px; color: var(--text3); letter-spacing: 0.2px; }
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.stat-sub { font-size: 10px; color: var(--text3); }
+.v-purple { color: var(--accent2); }
+.v-green { color: var(--green); }
+.v-red { color: var(--red); }
+.v-amber { color: var(--amber); }
+
+/* ── KANBAN ── */
+.kanban-wrap {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 18px;
+  display: flex;
+  gap: 12px;
+}
+.col {
+  min-width: 200px;
+  width: 200px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+}
+.col-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 4px 10px;
+  flex-shrink: 0;
+}
+.col-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.col-name {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text1);
+  letter-spacing: 0.2px;
+}
+.col-count {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--text3);
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  padding: 1px 7px;
+}
+.col-body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 2px 2px 2px 2px;
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 12px 13px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, transform .12s;
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  opacity: 0;
+  transition: opacity .15s;
+}
+.card:hover { border-color: var(--line2); background: var(--bg3); transform: translateY(-1px); }
+.card:hover::before { opacity: 1; }
+.card.priority::before { background: var(--red); opacity: 1; }
+.card-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text0);
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+.card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.tag {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 99px;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+.tag-sm { background: rgba(124,109,250,0.12); color: #a594ff; border-color: rgba(124,109,250,0.2); }
+.tag-ca { background: var(--teal-dim); color: var(--teal); border-color: rgba(45,212,191,0.2); }
+.tag-st { background: var(--amber-dim); color: var(--amber); border-color: rgba(245,166,35,0.2); }
+.tag-th { background: var(--pink-dim); color: var(--pink); border-color: rgba(232,121,160,0.2); }
+.tag-reel { background: var(--blue-dim); color: var(--blue); border-color: rgba(74,158,255,0.2); }
+.tag-urg-a { background: var(--red-dim); color: var(--red); border-color: rgba(244,106,106,0.2); }
+.tag-urg-m { background: var(--amber-dim); color: var(--amber); border-color: rgba(245,166,35,0.2); }
+.tag-urg-b { background: var(--green-dim); color: var(--green); border-color: rgba(62,207,142,0.2); }
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+.card-date { font-size: 10px; color: var(--text3); display: flex; align-items: center; gap: 3px; }
+.card-date.late { color: var(--red); }
+.card-value { font-size: 11px; font-weight: 500; color: var(--green); }
+.card-rev {
+  font-size: 10px;
+  color: var(--text3);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 7px;
+}
+.rev-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--bg5);
+  display: inline-block;
+}
+.rev-dot.filled { background: var(--accent); }
+.add-card {
+  margin-top: 4px;
+  padding: 8px;
+  border: 1px dashed var(--line2);
+  border-radius: var(--r-md);
+  font-size: 11px;
+  color: var(--text3);
+  cursor: pointer;
+  text-align: center;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.add-card:hover { border-color: var(--accent); color: var(--accent2); background: var(--accent-dim2); }
+
+/* ── MODAL OVERLAY ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 100;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+  backdrop-filter: blur(2px);
+}
+.overlay.open { display: flex; }
+
+/* ── MODAL ── */
+.modal {
+  background: var(--bg1);
+  border: 1px solid var(--line2);
+  border-radius: var(--r-xl);
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp .2s ease;
+  overflow: hidden;
+  margin: auto;
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.modal-head {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.modal-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.modal-title-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text0);
+  letter-spacing: -0.3px;
+}
+.modal-title-input::placeholder { color: var(--text3); }
+.modal-close {
+  width: 28px; height: 28px;
+  border-radius: var(--r-sm);
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  color: var(--text2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  transition: all .15s;
+}
+.modal-close:hover { background: var(--bg4); color: var(--text0); }
+.modal-body { display: flex; }
+.modal-main { flex: 1; padding: 18px 20px; border-right: 1px solid var(--line); overflow-y: auto; max-height: 70vh; }
+.modal-side { width: 210px; flex-shrink: 0; padding: 16px; overflow-y: auto; }
+
+.field-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text3);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.field-group { margin-bottom: 16px; }
+.field-input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  color: var(--text0);
+  font-size: 12px;
+  padding: 8px 11px;
+  outline: none;
+  transition: border-color .15s;
+  font-family: var(--font-body);
+}
+.field-input:focus { border-color: var(--accent); background: var(--bg2); }
+.field-input::placeholder { color: var(--text3); }
+textarea.field-input { resize: vertical; min-height: 70px; line-height: 1.55; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.drive-field {
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+.drive-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 11px;
+  border-bottom: 1px solid var(--line);
+}
+.drive-svg { width: 15px; height: 15px; flex-shrink: 0; }
+.drive-input-inner {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 12px;
+  color: var(--text0);
+  font-family: var(--font-body);
+}
+.drive-input-inner::placeholder { color: var(--text3); }
+.drive-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 11px;
+}
+.drive-link-name { font-size: 11px; color: var(--blue); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.drive-btn {
+  font-size: 10px;
+  padding: 3px 9px;
+  border-radius: var(--r-sm);
+  background: var(--blue-dim);
+  color: var(--blue);
+  border: 1px solid rgba(74,158,255,0.2);
+  cursor: pointer;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background .15s;
+}
+.drive-btn:hover { background: rgba(74,158,255,0.2); }
+
+.type-grid { display: flex; flex-wrap: wrap; gap: 5px; }
+.type-chip {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  cursor: pointer;
+  border: 1px solid var(--line2);
+  background: var(--bg3);
+  color: var(--text2);
+  transition: all .15s;
+  font-weight: 500;
+}
+.type-chip:hover { border-color: var(--accent); color: var(--accent2); }
+.type-chip.sel { border-color: var(--accent); background: var(--accent-dim); color: var(--accent2); }
+.type-chip.sel-teal { border-color: var(--teal); background: var(--teal-dim); color: var(--teal); }
+.type-chip.sel-amber { border-color: var(--amber); background: var(--amber-dim); color: var(--amber); }
+.type-chip.sel-pink { border-color: var(--pink); background: var(--pink-dim); color: var(--pink); }
+.type-chip.sel-blue { border-color: var(--blue); background: var(--blue-dim); color: var(--blue); }
+
+.urg-row { display: flex; gap: 5px; }
+.urg-chip {
+  flex: 1;
+  text-align: center;
+  padding: 6px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid var(--line2);
+  background: var(--bg3);
+  color: var(--text2);
+  transition: all .15s;
+}
+.urg-chip.sel-red { border-color: var(--red); background: var(--red-dim); color: var(--red); }
+.urg-chip.sel-amber { border-color: var(--amber); background: var(--amber-dim); color: var(--amber); }
+.urg-chip.sel-green { border-color: var(--green); background: var(--green-dim); color: var(--green); }
+
+/* ── COMMENTS ── */
+.divider { height: 1px; background: var(--line); margin: 16px 0; }
+.comments-section { margin-top: 4px; }
+.comment-item { display: flex; gap: 9px; margin-bottom: 12px; }
+.comment-av {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 600; flex-shrink: 0;
+}
+.av-me { background: var(--accent-dim); border: 1px solid var(--accent); color: var(--accent2); }
+.av-cl { background: var(--teal-dim); border: 1px solid var(--teal); color: var(--teal); }
+.comment-bubble {
+  flex: 1;
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: 0 var(--r-md) var(--r-md) var(--r-md);
+  padding: 8px 11px;
+}
+.comment-bubble.mine {
+  background: var(--accent-dim2);
+  border-color: rgba(124,109,250,0.15);
+  border-radius: var(--r-md) 0 var(--r-md) var(--r-md);
+}
+.comment-meta { font-size: 10px; color: var(--text3); margin-bottom: 3px; display: flex; gap: 6px; }
+.comment-author { font-weight: 500; color: var(--text1); }
+.comment-text { font-size: 12px; color: var(--text1); line-height: 1.5; }
+.comment-input-row { display: flex; gap: 8px; align-items: flex-end; margin-top: 10px; }
+.comment-ta {
+  flex: 1;
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  border-radius: var(--r-md);
+  color: var(--text0);
+  font-size: 12px;
+  padding: 8px 11px;
+  outline: none;
+  resize: none;
+  min-height: 36px;
+  max-height: 80px;
+  line-height: 1.4;
+  font-family: var(--font-body);
+  transition: border-color .15s;
+}
+.comment-ta:focus { border-color: var(--accent); }
+.comment-ta::placeholder { color: var(--text3); }
+.btn-send {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-md);
+  padding: 8px 13px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s;
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+.btn-send:hover { background: #6a5ce8; }
+
+/* ── SIDEBAR FIELDS ── */
+.side-field { margin-bottom: 14px; }
+.side-label { font-size: 10px; color: var(--text3); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 5px; }
+.side-input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--text0);
+  font-size: 12px;
+  padding: 7px 10px;
+  outline: none;
+  transition: border-color .15s;
+  font-family: var(--font-body);
+}
+.side-input:focus { border-color: var(--accent); }
+.status-select-wrap { position: relative; }
+.status-pill-btn {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--text0);
+  font-size: 12px;
+  padding: 7px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-weight: 500;
+}
+.s-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.status-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--bg2);
+  border: 1px solid var(--line2);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  z-index: 200;
+}
+.status-dropdown.open { display: block; }
+.status-opt {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 11px;
+  font-size: 12px;
+  color: var(--text1);
+  cursor: pointer;
+  transition: background .1s;
+}
+.status-opt:hover { background: var(--bg3); }
+
+.progress-row { display: flex; align-items: center; gap: 8px; }
+.progress-track {
+  flex: 1;
+  height: 4px;
+  background: var(--bg5);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.progress-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width .2s; }
+.progress-pct { font-size: 11px; color: var(--text2); min-width: 28px; text-align: right; }
+input[type=range] {
+  width: 100%;
+  accent-color: var(--accent);
+  cursor: pointer;
+  margin-top: 5px;
+}
+
+.pay-btn {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: var(--r-sm);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid rgba(244,106,106,0.25);
+  background: var(--red-dim);
+  color: var(--red);
+  transition: all .15s;
+  font-family: var(--font-body);
+}
+.pay-btn.paid {
+  border-color: rgba(62,207,142,0.25);
+  background: var(--green-dim);
+  color: var(--green);
+}
+
+.rev-row { display: flex; align-items: center; gap: 5px; }
+.rev-d { width: 8px; height: 8px; border-radius: 50%; background: var(--bg5); transition: background .2s; }
+.rev-d.on { background: var(--accent); }
+.rev-controls { display: flex; gap: 5px; margin-top: 6px; }
+.rev-btn {
+  flex: 1;
+  padding: 5px;
+  border-radius: var(--r-sm);
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  color: var(--text2);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all .15s;
+}
+.rev-btn:hover { border-color: var(--accent); color: var(--accent2); background: var(--accent-dim2); }
+
+.tags-wrap { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.tag-item {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 99px;
+  background: var(--bg4);
+  border: 1px solid var(--line2);
+  color: var(--text1);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.tag-x { cursor: pointer; color: var(--text3); font-size: 11px; transition: color .1s; }
+.tag-x:hover { color: var(--red); }
+.tag-add-input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--text0);
+  font-size: 11px;
+  padding: 5px 9px;
+  outline: none;
+  font-family: var(--font-body);
+}
+.tag-add-input:focus { border-color: var(--accent); }
+
+/* ── MODAL FOOTER ── */
+.modal-foot {
+  padding: 12px 20px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.btn-del {
+  background: var(--red-dim);
+  border: 1px solid rgba(244,106,106,0.2);
+  color: var(--red);
+  border-radius: var(--r-md);
+  padding: 7px 13px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: background .15s;
+}
+.btn-del:hover { background: rgba(244,106,106,0.2); }
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--line2);
+  color: var(--text2);
+  border-radius: var(--r-md);
+  padding: 7px 13px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all .15s;
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent2); background: var(--accent-dim2); }
+.foot-right { display: flex; gap: 7px; }
+
+/* ── NEW TASK FORM ── */
+.new-task-overlay { display: none; }
+.new-task-overlay.open { display: flex; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--bg2);
+  border: 1px solid var(--green);
+  border-radius: var(--r-md);
+  padding: 10px 16px;
+  font-size: 12px;
+  color: var(--green);
+  z-index: 999;
+  display: none;
+  animation: fadeIn .2s ease;
+}
+.toast.show { display: block; }
+/* ── LIST VIEW ── */
+.list-wrap {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 22px;
+}
+.list-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.list-table th {
+  text-align: left;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text3);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  padding: 0 12px 10px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+.list-table th:hover { color: var(--text1); }
+.list-table th .sort-arrow { margin-left: 4px; opacity: .5; font-size: 9px; }
+.list-table th.sorted { color: var(--accent2); }
+.list-table th.sorted .sort-arrow { opacity: 1; }
+.list-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+  color: var(--text1);
+}
+.list-table tr:hover td { background: var(--bg2); cursor: pointer; }
+.list-table tr:last-child td { border-bottom: none; }
+.lt-title { font-weight: 500; color: var(--text0); max-width: 220px; }
+.lt-title-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+.lt-cliente { color: var(--text2); white-space: nowrap; }
+.lt-status { white-space: nowrap; }
+.lt-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+.lt-tags { display: flex; flex-wrap: wrap; gap: 3px; min-width: 90px; }
+.lt-prazo { white-space: nowrap; font-size: 11px; }
+.lt-prazo.late { color: var(--red); }
+.lt-valor { white-space: nowrap; font-weight: 500; color: var(--green); }
+.lt-pay { white-space: nowrap; }
+.lt-pay-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-weight: 500;
+}
+.lt-pay-badge.paid { background: var(--green-dim); color: var(--green); }
+.lt-pay-badge.unpaid { background: var(--red-dim); color: var(--red); }
+.lt-rev { font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 2px; white-space: nowrap; }
+.lt-rev-d { width: 6px; height: 6px; border-radius: 50%; background: var(--bg5); display: inline-block; }
+.lt-rev-d.on { background: var(--accent); }
+.list-group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 12px 6px;
+}
+.list-group-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.list-group-name {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text2);
+  letter-spacing: 0.3px;
+}
+.list-group-count {
+  font-size: 10px;
+  color: var(--text3);
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  padding: 1px 7px;
+}
+.list-section { margin-bottom: 10px; background: var(--bg1); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+.list-section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--line);
+  user-select: none;
+}
+.list-section-toggle:hover { background: var(--bg2); }
+.list-section-arrow { font-size: 10px; color: var(--text3); transition: transform .2s; }
+.list-section-arrow.open { transform: rotate(90deg); }
+.list-empty {
+  padding: 18px 14px;
+  font-size: 12px;
+  color: var(--text3);
+  text-align: center;
+}
+
+/* ── DRAG AND DROP ── */
+.card[draggable="true"] { cursor: grab; }
+.card[draggable="true"]:active { cursor: grabbing; }
+.card.dragging {
+  opacity: 0.4;
+  transform: rotate(2deg) scale(0.97);
+  border-color: var(--accent) !important;
+  box-shadow: 0 8px 24px rgba(124,109,250,0.25);
+}
+.col-body.drag-over {
+  background: var(--accent-dim2);
+  border-radius: var(--r-md);
+  outline: 2px dashed var(--accent);
+  outline-offset: -2px;
+}
+.drop-placeholder {
+  height: 60px;
+  border: 2px dashed var(--accent);
+  border-radius: var(--r-md);
+  background: var(--accent-dim2);
+  flex-shrink: 0;
+  animation: pulsePlaceholder .8s ease-in-out infinite alternate;
+}
+@keyframes pulsePlaceholder {
+  from { opacity: .5; }
+  to { opacity: 1; }
+}
+
+/* ── LIST DRAG AND DROP ── */
+.list-table tr[draggable="true"] { cursor: grab; }
+.list-table tr[draggable="true"]:active { cursor: grabbing; }
+.list-table tr.dragging td { opacity: 0.4; background: var(--accent-dim2) !important; }
+.list-table tr.drag-over-row td { background: var(--accent-dim2) !important; border-top: 2px solid var(--accent) !important; }
+.lt-drag-handle {
+  color: var(--text3);
+  font-size: 12px;
+  cursor: grab;
+  padding: 0 6px;
+  opacity: 0;
+  transition: opacity .15s;
+  user-select: none;
+}
+.list-table tr:hover .lt-drag-handle { opacity: 1; }
+
+/* Status column in list */
+.lt-status-col { white-space: nowrap; }
+.lt-status-select {
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--text1);
+  font-size: 11px;
+  padding: 3px 8px;
+  cursor: pointer;
+  outline: none;
+  font-family: var(--font-body);
+  appearance: none;
+  -webkit-appearance: none;
+}
+.lt-status-select:focus { border-color: var(--accent); }
+
+/* ── FINANCIAL VIEW ── */
+.fin-wrap {
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 24px;
+  display: none;
+}
+.fin-wrap.active { display: block; }
+
+.fin-hero {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.fin-hero-card {
+  background: var(--bg1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .15s;
+}
+.fin-hero-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+}
+.fin-hero-card.c-green::after { background: var(--green); }
+.fin-hero-card.c-amber::after { background: var(--amber); }
+.fin-hero-card.c-purple::after { background: var(--accent); }
+.fin-hero-card.c-blue::after { background: var(--blue); }
+.fin-hero-card:hover { border-color: var(--line2); }
+.fin-hero-label { font-size: 11px; color: var(--text3); letter-spacing: 0.2px; }
+.fin-hero-value {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-top: 2px;
+}
+.fin-hero-sub { font-size: 10px; color: var(--text3); margin-top: 1px; }
+.fin-hero-card.c-green .fin-hero-value { color: var(--green); }
+.fin-hero-card.c-amber .fin-hero-value { color: var(--amber); }
+.fin-hero-card.c-purple .fin-hero-value { color: var(--accent2); }
+.fin-hero-card.c-blue .fin-hero-value { color: var(--blue); }
+
+.fin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.fin-grid.wide { grid-template-columns: 1fr; }
+
+.fin-panel {
+  background: var(--bg1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.fin-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.fin-panel-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text0);
+  letter-spacing: -0.2px;
+}
+.fin-panel-sub { font-size: 11px; color: var(--text3); }
+.fin-panel-body { padding: 14px 18px; }
+
+/* Type breakdown bars */
+.type-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 11px;
+}
+.type-bar-row:last-child { margin-bottom: 0; }
+.type-bar-label { font-size: 12px; color: var(--text1); width: 100px; flex-shrink: 0; }
+.type-bar-track {
+  flex: 1;
+  height: 6px;
+  background: var(--bg4);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.type-bar-fill { height: 100%; border-radius: 99px; transition: width .4s ease; }
+.type-bar-meta { font-size: 11px; color: var(--text2); min-width: 70px; text-align: right; }
+
+/* Client table */
+.fin-client-table { width: 100%; border-collapse: collapse; }
+.fin-client-table th {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 0 0 8px 0;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+.fin-client-table th:not(:first-child) { text-align: right; }
+.fin-client-table td {
+  padding: 9px 0;
+  font-size: 12px;
+  color: var(--text1);
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+.fin-client-table td:not(:first-child) { text-align: right; }
+.fin-client-table tr:last-child td { border-bottom: none; }
+.fin-client-name { font-weight: 500; color: var(--text0); }
+.fin-client-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 99px;
+}
+.fin-client-badge.paid { background: var(--green-dim); color: var(--green); }
+.fin-client-badge.unpaid { background: var(--amber-dim); color: var(--amber); }
+
+/* Tasks table */
+.fin-tasks-table { width: 100%; border-collapse: collapse; }
+.fin-tasks-table th {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 0 8px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.fin-tasks-table th:not(:first-child) { text-align: right; }
+.fin-tasks-table td {
+  padding: 9px 8px;
+  font-size: 12px;
+  color: var(--text1);
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+.fin-tasks-table td:not(:first-child) { text-align: right; }
+.fin-tasks-table tr:last-child td { border-bottom: none; }
+.fin-tasks-table tr:hover td { background: var(--bg2); cursor: pointer; }
+.fin-tasks-table .ft-title { font-weight: 500; color: var(--text0); text-align: left !important; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pay-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 3px 9px;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: all .15s;
+  border: none;
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+.pay-pill.paid { background: var(--green-dim); color: var(--green); border: 1px solid rgba(62,207,142,0.2); }
+.pay-pill.unpaid { background: var(--red-dim); color: var(--red); border: 1px solid rgba(244,106,106,0.2); }
+.pay-pill:hover { filter: brightness(1.15); }
+
+/* Donut chart */
+.fin-donut-wrap {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.fin-donut-svg { flex-shrink: 0; }
+.fin-donut-legend { display: flex; flex-direction: column; gap: 8px; }
+.fin-legend-item { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--text1); }
+.fin-legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.fin-legend-val { margin-left: auto; font-weight: 500; color: var(--text0); }
+
+/* Empty state */
+.fin-empty {
+  text-align: center;
+  padding: 30px;
+  color: var(--text3);
+  font-size: 12px;
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">CF</div>
+    <div class="logo-text">Creative<span>Flow</span></div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Workspace</div>
+    <div class="nav-item active" id="nav-kanban" onclick="setView('kanban')">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="4" height="14" rx="1.5" fill="currentColor" opacity=".6"/><rect x="6.5" y="1" width="4" height="9" rx="1.5" fill="currentColor"/><rect x="12" y="1" width="3" height="11" rx="1.5" fill="currentColor" opacity=".6"/></svg>
+      Kanban
+      <span class="nav-badge" id="nav-kanban-badge">12</span>
+    </div>
+    <div class="nav-item" id="nav-lista" onclick="setView('lista')">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="1" y="2" width="14" height="2" rx="1" fill="currentColor" opacity=".5"/><rect x="1" y="7" width="14" height="2" rx="1" fill="currentColor" opacity=".8"/><rect x="1" y="12" width="10" height="2" rx="1" fill="currentColor" opacity=".5"/></svg>
+      Lista
+    </div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Clientes</div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.2" fill="none" opacity=".7"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none" opacity=".5"/></svg>
+      Clientes
+    </div>
+    <div class="nav-item" id="nav-financeiro" onclick="setView('financeiro')">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.2" fill="none" opacity=".6"/><path d="M5 5h6M5 8h4M5 11h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity=".7"/></svg>
+      Financeiro
+      <span class="nav-badge red" id="nav-fin-badge">2</span>
+    </div>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="user-row">
+      <div class="avatar">VC</div>
+      <div>
+        <div class="user-name">Você</div>
+        <div class="user-role">Designer criativo</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Kanban</div>
+    </div>
+    <span class="topbar-subtitle">12 demandas ativas · maio 2026</span>
+    <div class="topbar-right">
+      <select class="filter-select" id="filterType" onchange="filterCards()">
+        <option value="">Todos os tipos</option>
+        <option value="Social media">Social media</option>
+        <option value="Carrossel">Carrossel</option>
+        <option value="Story">Story</option>
+        <option value="Thumbnail">Thumbnail</option>
+        <option value="Reels">Reels</option>
+      </select>
+      <select class="filter-select" id="filterUrg" onchange="filterCards()">
+        <option value="">Todas urgências</option>
+        <option value="Alta">Alta</option>
+        <option value="Média">Média</option>
+        <option value="Baixa">Baixa</option>
+      </select>
+      <button class="btn-primary" onclick="openNew()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Nova demanda
+      </button>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Demandas ativas</div>
+      <div class="stat-value v-purple" id="st-ativas">0</div>
+      <div class="stat-sub">em andamento</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Entregues</div>
+      <div class="stat-value v-green" id="st-entregues">0</div>
+      <div class="stat-sub">aprovadas</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Atrasadas</div>
+      <div class="stat-value v-red" id="st-atrasadas">0</div>
+      <div class="stat-sub">requer atenção</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">A receber</div>
+      <div class="stat-value v-amber" id="st-receber">R$0</div>
+      <div class="stat-sub">pendente</div>
+    </div>
+  </div>
+
+  <div class="kanban-wrap" id="kanban"></div>
+  <div class="list-wrap" id="listView" style="display:none"></div>
+  <div class="fin-wrap" id="finView"></div>
+</div>
+
+<!-- TASK DETAIL OVERLAY -->
+<div class="overlay" id="detailOverlay" onclick="closeDetailOutside(event)">
+  <div class="modal" id="detailModal">
+    <div class="modal-head">
+      <div class="modal-status-dot" id="md-statusDot" style="background:#378ADD"></div>
+      <input class="modal-title-input" id="md-title" placeholder="Título da tarefa...">
+      <button class="modal-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-main">
+        <div class="field-group">
+          <div class="field-label">Briefing / descrição</div>
+          <textarea class="field-input" id="md-brief" rows="3" placeholder="Descreva o que precisa ser feito..."></textarea>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Tipo de criativo</div>
+          <div class="type-grid" id="md-types">
+            <span class="type-chip" data-type="Social media" data-sel="sel" onclick="toggleType(this)">Social media</span>
+            <span class="type-chip" data-type="Carrossel" data-sel="sel-teal" onclick="toggleType(this)">Carrossel</span>
+            <span class="type-chip" data-type="Story" data-sel="sel-amber" onclick="toggleType(this)">Story</span>
+            <span class="type-chip" data-type="Thumbnail" data-sel="sel-pink" onclick="toggleType(this)">Thumbnail</span>
+            <span class="type-chip" data-type="Reels" data-sel="sel-blue" onclick="toggleType(this)">Reels</span>
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Urgência</div>
+          <div class="urg-row" id="md-urg">
+            <div class="urg-chip" data-u="Alta" data-sel="sel-red" onclick="toggleUrg(this)">Alta</div>
+            <div class="urg-chip" data-u="Média" data-sel="sel-amber" onclick="toggleUrg(this)">Média</div>
+            <div class="urg-chip" data-u="Baixa" data-sel="sel-green" onclick="toggleUrg(this)">Baixa</div>
+          </div>
+        </div>
+        <div class="field-row field-group">
+          <div>
+            <div class="field-label">Prazo de entrega</div>
+            <input type="date" class="field-input" id="md-prazo">
+          </div>
+          <div>
+            <div class="field-label">Valor (R$)</div>
+            <input type="text" class="field-input" id="md-valor" placeholder="0,00">
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Link do Google Drive</div>
+          <div class="drive-field">
+            <div class="drive-input-wrap">
+              <svg class="drive-svg" viewBox="0 0 15 15" fill="none">
+                <path d="M1 12L4.5 5.5L8.5 12H1Z" fill="#0F9D58"/>
+                <path d="M4.5 5.5L8.5 12H14L10 5.5H4.5Z" fill="#4285F4"/>
+                <path d="M1 12L2.8 8.5H7.2L8.5 12H1Z" fill="#FBBC05"/>
+              </svg>
+              <input type="url" class="drive-input-inner" id="md-drive" placeholder="Cole o link da pasta ou arquivo do Drive...">
+            </div>
+            <div class="drive-preview" id="md-drive-preview" style="display:none">
+              <svg width="13" height="13" viewBox="0 0 15 15" fill="none"><path d="M1 12L4.5 5.5L8.5 12H1Z" fill="#0F9D58"/><path d="M4.5 5.5L8.5 12H14L10 5.5H4.5Z" fill="#4285F4"/><path d="M1 12L2.8 8.5H7.2L8.5 12H1Z" fill="#FBBC05"/></svg>
+              <span class="drive-link-name" id="md-drive-name">Pasta do Drive</span>
+              <button class="drive-btn" id="md-drive-open">Abrir</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field-label" style="margin-bottom:10px">Comentários</div>
+        <div class="comments-section" id="md-comments"></div>
+        <div class="comment-input-row">
+          <div class="comment-av av-me" style="width:26px;height:26px;font-size:9px;margin-bottom:2px">VC</div>
+          <textarea class="comment-ta" id="md-comment-input" placeholder="Escreva um comentário..." rows="1"></textarea>
+          <button class="btn-send" onclick="sendComment()">Enviar</button>
+        </div>
+      </div>
+
+      <div class="modal-side">
+        <div class="side-field">
+          <div class="side-label">Status</div>
+          <div class="status-select-wrap">
+            <div class="status-pill-btn" id="md-statusBtn" onclick="toggleStatusDD()">
+              <span class="s-dot" id="md-sDot" style="background:#378ADD"></span>
+              <span id="md-sLabel">Fazendo</span>
+            </div>
+            <div class="status-dropdown" id="statusDD">
+              <div class="status-opt" onclick="setStatus('Aguardando início','#888780',0)"><span class="s-dot" style="background:#888780"></span>Aguardando início</div>
+              <div class="status-opt" onclick="setStatus('Prioridade do dia','#f46a6a',1)"><span class="s-dot" style="background:#f46a6a"></span>Prioridade do dia</div>
+              <div class="status-opt" onclick="setStatus('Fazendo','#4a9eff',2)"><span class="s-dot" style="background:#4a9eff"></span>Fazendo</div>
+              <div class="status-opt" onclick="setStatus('Entregue','#3ecf8e',3)"><span class="s-dot" style="background:#3ecf8e"></span>Entregue</div>
+              <div class="status-opt" onclick="setStatus('Alteração','#f5a623',4)"><span class="s-dot" style="background:#f5a623"></span>Alteração</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="side-field">
+          <div class="side-label">Cliente</div>
+          <input type="text" class="side-input" id="md-cliente" placeholder="Nome do cliente">
+        </div>
+
+        <div class="side-field">
+          <div class="side-label">Revisões</div>
+          <div class="rev-row" id="md-revDots"></div>
+          <div class="rev-controls">
+            <button class="rev-btn" onclick="addRev()">+ Revisão</button>
+            <button class="rev-btn" onclick="rmRev()">−</button>
+          </div>
+        </div>
+
+        <div class="side-field">
+          <div class="side-label">Progresso</div>
+          <div class="progress-row">
+            <div class="progress-track"><div class="progress-fill" id="md-pfill" style="width:0%"></div></div>
+            <span class="progress-pct" id="md-ppct">0%</span>
+          </div>
+          <input type="range" min="0" max="100" value="0" step="5" id="md-prog" oninput="updateProgress(this.value)">
+        </div>
+
+        <div class="side-field">
+          <div class="side-label">Pagamento</div>
+          <button class="pay-btn" id="md-payBtn" onclick="togglePay()">Pendente</button>
+        </div>
+
+        <div class="side-field">
+          <div class="side-label">Tags</div>
+          <div class="tags-wrap" id="md-tags"></div>
+          <input type="text" class="tag-add-input" id="md-tagInput" placeholder="+ nova tag (Enter)" onkeydown="addTag(event)">
+        </div>
+
+        <div class="side-field" id="md-created-wrap">
+          <div class="side-label">Criado em</div>
+          <span style="font-size:11px;color:var(--text2)" id="md-created"></span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-del" onclick="deleteTask()">Excluir</button>
+      <div class="foot-right">
+        <button class="btn-ghost" onclick="closeDetail()">Cancelar</button>
+        <button class="btn-primary" onclick="saveTask()">Salvar alterações</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NEW TASK OVERLAY -->
+<div class="overlay new-task-overlay" id="newOverlay" onclick="closeNewOutside(event)">
+  <div class="modal" id="newModal">
+    <div class="modal-head">
+      <span style="font-family:var(--font-display);font-weight:700;font-size:15px;color:var(--text0)">Nova demanda</span>
+      <button class="modal-close" style="margin-left:auto" onclick="closeNew()">✕</button>
+    </div>
+    <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div style="grid-column:1/-1">
+        <div class="field-label">Título *</div>
+        <input type="text" class="field-input" id="new-title" placeholder="Título da demanda...">
+      </div>
+      <div style="grid-column:1/-1">
+        <div class="field-label">Briefing</div>
+        <textarea class="field-input" id="new-brief" rows="2" placeholder="Descreva brevemente o que precisa ser feito..."></textarea>
+      </div>
+      <div>
+        <div class="field-label">Cliente</div>
+        <input type="text" class="field-input" id="new-cliente" placeholder="Nome do cliente">
+      </div>
+      <div>
+        <div class="field-label">Valor (R$)</div>
+        <input type="text" class="field-input" id="new-valor" placeholder="0,00">
+      </div>
+      <div>
+        <div class="field-label">Prazo de entrega</div>
+        <input type="date" class="field-input" id="new-prazo">
+      </div>
+      <div>
+        <div class="field-label">Status inicial</div>
+        <select class="field-input" id="new-status">
+          <option value="0">Aguardando início</option>
+          <option value="1">Prioridade do dia</option>
+          <option value="2">Fazendo</option>
+        </select>
+      </div>
+      <div style="grid-column:1/-1">
+        <div class="field-label">Tipo de criativo</div>
+        <div class="type-grid" id="new-types">
+          <span class="type-chip" data-type="Social media" data-sel="sel" onclick="toggleType(this)">Social media</span>
+          <span class="type-chip" data-type="Carrossel" data-sel="sel-teal" onclick="toggleType(this)">Carrossel</span>
+          <span class="type-chip" data-type="Story" data-sel="sel-amber" onclick="toggleType(this)">Story</span>
+          <span class="type-chip" data-type="Thumbnail" data-sel="sel-pink" onclick="toggleType(this)">Thumbnail</span>
+          <span class="type-chip" data-type="Reels" data-sel="sel-blue" onclick="toggleType(this)">Reels</span>
+        </div>
+      </div>
+      <div style="grid-column:1/-1">
+        <div class="field-label">Urgência</div>
+        <div class="urg-row" id="new-urg">
+          <div class="urg-chip" data-u="Alta" data-sel="sel-red" onclick="toggleUrg(this)">Alta</div>
+          <div class="urg-chip" data-u="Média" data-sel="sel-amber" onclick="toggleUrg(this)">Média</div>
+          <div class="urg-chip sel-amber" data-u="Baixa" data-sel="sel-green" onclick="toggleUrg(this)">Baixa</div>
+        </div>
+      </div>
+      <div style="grid-column:1/-1">
+        <div class="field-label">Link do Google Drive</div>
+        <div class="drive-field">
+          <div class="drive-input-wrap">
+            <svg class="drive-svg" viewBox="0 0 15 15" fill="none">
+              <path d="M1 12L4.5 5.5L8.5 12H1Z" fill="#0F9D58"/>
+              <path d="M4.5 5.5L8.5 12H14L10 5.5H4.5Z" fill="#4285F4"/>
+              <path d="M1 12L2.8 8.5H7.2L8.5 12H1Z" fill="#FBBC05"/>
+            </svg>
+            <input type="url" class="drive-input-inner" id="new-drive" placeholder="Cole o link da pasta ou arquivo do Drive...">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="closeNew()">Cancelar</button>
+      <div class="foot-right">
+        <button class="btn-primary" onclick="createTask()">Criar demanda</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const COLS = [
+  { id: 0, name: 'Aguardando início', dot: '#888780' },
+  { id: 1, name: 'Prioridade do dia', dot: '#f46a6a' },
+  { id: 2, name: 'Fazendo',           dot: '#4a9eff' },
+  { id: 3, name: 'Entregue',          dot: '#3ecf8e' },
+  { id: 4, name: 'Alteração',         dot: '#f5a623' },
+];
+
+const TYPE_CLASS = {
+  'Social media': 'tag-sm',
+  'Carrossel': 'tag-ca',
+  'Story': 'tag-st',
+  'Thumbnail': 'tag-th',
+  'Reels': 'tag-reel',
+};
+const URG_CLASS = { 'Alta': 'tag-urg-a', 'Média': 'tag-urg-m', 'Baixa': 'tag-urg-b' };
+
+let tasks = [
+  { id:1, title:'Banner Black Friday', brief:'Banner principal para divulgação da campanha. Fundo escuro com elementos vibrantes.', types:['Social media'], urg:'Média', prazo:'2026-05-05', valor:'180,00', colId:0, cliente:'Marca X', drive:'', comments:[], tags:['campanha'], rev:0, prog:10, paid:false, created:'30 abr 2026' },
+  { id:2, title:'Carrossel produto novo', brief:'Cliente quer carrossel de 6 slides. Paleta verde + branco.', types:['Carrossel'], urg:'Alta', prazo:'2026-05-01', valor:'250,00', colId:0, cliente:'Marca Verde', drive:'https://drive.google.com/drive/folders/exemplo', comments:[{av:'CL',name:'Cliente',text:'Referência: estilo do março com sombra sutil.',mine:false,time:'ontem 14:32'},{av:'VC',name:'Você',text:'Entendido! Confirmo a paleta amanhã.',mine:true,time:'ontem 15:10'}], tags:['lançamento','produto'], rev:1, prog:35, paid:false, created:'29 abr 2026' },
+  { id:3, title:'Pack stories lançamento', brief:'Pack com 5 stories animados para lançamento de produto.', types:['Story'], urg:'Baixa', prazo:'2026-05-08', valor:'120,00', colId:0, cliente:'Startup XY', drive:'', comments:[], tags:[], rev:0, prog:0, paid:false, created:'01 mai 2026' },
+  { id:4, title:'Thumb YouTube – Review', brief:'Thumbnail impactante com foto do produto e texto chamativo.', types:['Thumbnail'], urg:'Alta', prazo:'2026-05-01', valor:'90,00', colId:1, cliente:'Canal YT', drive:'', comments:[], tags:['urgente'], rev:0, prog:20, paid:false, created:'30 abr 2026' },
+  { id:5, title:'Reels campanha maio', brief:'Reels de 30s para campanha de maio. Edição dinâmica.', types:['Reels'], urg:'Alta', prazo:'2026-05-01', valor:'300,00', colId:1, cliente:'Marca X', drive:'', comments:[], tags:['maio'], rev:0, prog:50, paid:false, created:'30 abr 2026' },
+  { id:6, title:'Feed institucional – 4 posts', brief:'4 posts para o feed institucional seguindo o brand guide.', types:['Social media'], urg:'Média', prazo:'2026-05-06', valor:'400,00', colId:2, cliente:'Corp LTDA', drive:'', comments:[], tags:['institucional'], rev:1, prog:60, paid:false, created:'28 abr 2026' },
+  { id:7, title:'Carrossel dicas de casa', brief:'Carrossel educativo com 8 slides sobre decoração.', types:['Carrossel'], urg:'Média', prazo:'2026-05-07', valor:'220,00', colId:2, cliente:'Decor Studio', drive:'', comments:[], tags:[], rev:0, prog:45, paid:false, created:'29 abr 2026' },
+  { id:8, title:'Identidade visual post', brief:'Post de apresentação da nova identidade visual.', types:['Social media'], urg:'Baixa', prazo:'2026-04-29', valor:'150,00', colId:3, cliente:'Brand Co', drive:'', comments:[], tags:[], rev:2, prog:100, paid:true, created:'25 abr 2026' },
+  { id:9, title:'Pack stories semana', brief:'Pack semanal de stories com template reutilizável.', types:['Story'], urg:'Média', prazo:'2026-04-30', valor:'200,00', colId:3, cliente:'Marca X', drive:'', comments:[], tags:[], rev:0, prog:100, paid:false, created:'24 abr 2026' },
+  { id:10, title:'Banner promo – 2ª revisão', brief:'Cliente pediu segunda revisão: ajustar tipografia e cor do CTA.', types:['Social media'], urg:'Alta', prazo:'2026-05-01', valor:'180,00', colId:4, cliente:'Promo Co', drive:'', comments:[{av:'CL',name:'Cliente',text:'Por favor ajustar a fonte do botão para bold.',mine:false,time:'hoje 08:30'}], tags:['revisão'], rev:2, prog:80, paid:false, created:'27 abr 2026' },
+  { id:11, title:'Thumb – ajuste cor fundo', brief:'Alterar fundo de branco para cinza escuro conforme feedback.', types:['Thumbnail'], urg:'Média', prazo:'2026-05-03', valor:'90,00', colId:4, cliente:'Canal YT', drive:'', comments:[], tags:[], rev:1, prog:70, paid:false, created:'29 abr 2026' },
+  { id:12, title:'Reels depoimento cliente', brief:'Edição de vídeo com depoimento + legendas animadas.', types:['Reels'], urg:'Baixa', prazo:'2026-05-10', valor:'350,00', colId:0, cliente:'Corp LTDA', drive:'', comments:[], tags:['depoimento'], rev:0, prog:0, paid:false, created:'01 mai 2026' },
+];
+
+let nextId = 13;
+let currentTaskId = null;
+let revCount = 0;
+let paid = false;
+
+function formatDate(d) {
+  if (!d) return '';
+  const [y,m,day] = d.split('-');
+  return `${day}/${m}`;
+}
+function isLate(d) {
+  if (!d) return false;
+  return new Date(d) < new Date(new Date().toDateString());
+}
+function isToday(d) {
+  if (!d) return false;
+  return new Date(d).toDateString() === new Date().toDateString();
+}
+
+function renderKanban() {
+  const fType = document.getElementById('filterType').value;
+  const fUrg = document.getElementById('filterUrg').value;
+  const kb = document.getElementById('kanban');
+  kb.innerHTML = '';
+  COLS.forEach(col => {
+    let colTasks = tasks.filter(t => t.colId === col.id);
+    if (fType) colTasks = colTasks.filter(t => t.types.includes(fType));
+    if (fUrg) colTasks = colTasks.filter(t => t.urg === fUrg);
+
+    const colEl = document.createElement('div');
+    colEl.className = 'col';
+    colEl.innerHTML = `
+      <div class="col-head">
+        <div class="col-dot" style="background:${col.dot}"></div>
+        <span class="col-name">${col.name}</span>
+        <span class="col-count">${colTasks.length}</span>
+      </div>
+      <div class="col-body" id="col-${col.id}"></div>
+      <div class="add-card" onclick="openNew(${col.id})">+ Adicionar</div>
+    `;
+    kb.appendChild(colEl);
+
+    const body = document.getElementById('col-'+col.id);
+    colTasks.forEach(t => {
+      const card = document.createElement('div');
+      const priority = (col.id === 1);
+      card.className = 'card' + (priority ? ' priority' : '');
+      card.style.borderTopColor = priority ? 'var(--red)' : '';
+      
+      let tagsHtml = t.types.map(tp => `<span class="tag ${TYPE_CLASS[tp]||''}">${tp}</span>`).join('');
+      if (t.urg) tagsHtml += `<span class="tag ${URG_CLASS[t.urg]||''}">${t.urg}</span>`;
+      
+      let dateStr = '', dateCls = 'card-date';
+      if (t.prazo) {
+        if (isToday(t.prazo)) { dateStr = 'Hoje'; dateCls += ' late'; }
+        else if (isLate(t.prazo)) { dateStr = formatDate(t.prazo); dateCls += ' late'; }
+        else dateStr = formatDate(t.prazo);
+      }
+      
+      let revHtml = '';
+      if (t.rev > 0) {
+        const dots = [0,1,2].map(i => `<span class="rev-dot ${i < t.rev ? 'filled' : ''}"></span>`).join('');
+        revHtml = `<div class="card-rev">${dots}<span style="margin-left:3px">${t.rev}/3 rev</span></div>`;
+      }
+
+      card.innerHTML = `
+        <div class="card-title">${t.title}</div>
+        <div class="card-tags">${tagsHtml}</div>
+        <div class="card-footer">
+          <span class="${dateCls}">${dateStr}</span>
+          <span class="card-value">${t.valor ? 'R$'+t.valor : ''}</span>
+        </div>
+        ${revHtml}
+      `;
+      card.onclick = () => openDetail(t.id);
+      card.setAttribute('draggable', 'true');
+      card.dataset.taskId = t.id;
+
+      card.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('text/plain', t.id);
+        e.dataTransfer.effectAllowed = 'move';
+        setTimeout(() => card.classList.add('dragging'), 0);
+      });
+      card.addEventListener('dragend', () => {
+        card.classList.remove('dragging');
+        document.querySelectorAll('.drop-placeholder').forEach(p => p.remove());
+        document.querySelectorAll('.col-body.drag-over').forEach(c => c.classList.remove('drag-over'));
+      });
+      body.appendChild(card);
+    });
+  });
+  updateStats();
+  initKanbanDrop();
+}
+
+function initKanbanDrop() {
+  document.querySelectorAll('.col-body').forEach(body => {
+    const colId = parseInt(body.id.replace('col-', ''));
+
+    body.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      body.classList.add('drag-over');
+
+      // Show placeholder
+      if (!body.querySelector('.drop-placeholder')) {
+        const ph = document.createElement('div');
+        ph.className = 'drop-placeholder';
+        body.appendChild(ph);
+      }
+    });
+
+    body.addEventListener('dragleave', e => {
+      if (!body.contains(e.relatedTarget)) {
+        body.classList.remove('drag-over');
+        body.querySelectorAll('.drop-placeholder').forEach(p => p.remove());
+      }
+    });
+
+    body.addEventListener('drop', e => {
+      e.preventDefault();
+      body.classList.remove('drag-over');
+      body.querySelectorAll('.drop-placeholder').forEach(p => p.remove());
+      const taskId = parseInt(e.dataTransfer.getData('text/plain'));
+      const task = tasks.find(t => t.id === taskId);
+      if (task && task.colId !== colId) {
+        task.colId = colId;
+        renderKanban();
+        if (currentView === 'lista') renderList();
+        showToast(`Movido para "${COLS[colId].name}"`);
+      }
+    });
+  });
+}
+
+function updateStats() {
+  const active = tasks.filter(t => t.colId !== 3).length;
+  const delivered = tasks.filter(t => t.colId === 3).length;
+  const late = tasks.filter(t => t.prazo && isLate(t.prazo) && t.colId !== 3).length;
+  const receber = tasks
+    .filter(t => !t.paid && t.valor)
+    .reduce((sum, t) => {
+      const v = parseFloat((t.valor || '0').replace(',', '.')) || 0;
+      return sum + v;
+    }, 0);
+
+  document.getElementById('st-ativas').textContent = active;
+  document.getElementById('st-entregues').textContent = delivered;
+  document.getElementById('st-atrasadas').textContent = late;
+
+  const fmt = receber.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  document.getElementById('st-receber').textContent = 'R$' + fmt;
+
+  // Update financial badge (unpaid tasks)
+  const unpaidCount = tasks.filter(t => !t.paid && t.valor).length;
+  const finBadge = document.getElementById('nav-fin-badge');
+  if (finBadge) finBadge.textContent = unpaidCount;
+}
+
+function filterCards() { renderKanban(); }
+
+// ── DETAIL MODAL ──
+function openDetail(id) {
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  currentTaskId = id;
+  paid = t.paid;
+  revCount = t.rev;
+
+  document.getElementById('md-title').value = t.title;
+  document.getElementById('md-brief').value = t.brief;
+  document.getElementById('md-prazo').value = t.prazo;
+  document.getElementById('md-valor').value = t.valor;
+  document.getElementById('md-cliente').value = t.cliente;
+  document.getElementById('md-drive').value = t.drive;
+  document.getElementById('md-prog').value = t.prog;
+  document.getElementById('md-created').textContent = t.created;
+  updateProgress(t.prog);
+  updatePayBtn();
+  renderRevDots();
+  renderComments(t.comments);
+  renderTags(t.tags || []);
+  setStatus(COLS[t.colId].name, COLS[t.colId].dot, t.colId);
+
+  // types
+  document.querySelectorAll('#md-types .type-chip').forEach(el => {
+    el.className = 'type-chip';
+    if (t.types.includes(el.dataset.type)) el.classList.add(el.dataset.sel);
+  });
+  // urg
+  document.querySelectorAll('#md-urg .urg-chip').forEach(el => {
+    el.className = 'urg-chip';
+    if (el.dataset.u === t.urg) el.classList.add(el.dataset.sel);
+  });
+  // drive preview
+  updateDrivePreview(t.drive);
+
+  document.getElementById('detailOverlay').classList.add('open');
+}
+
+document.getElementById('md-drive').addEventListener('input', function() {
+  updateDrivePreview(this.value);
+});
+
+function updateDrivePreview(url) {
+  const prev = document.getElementById('md-drive-preview');
+  if (url && url.startsWith('http')) {
+    prev.style.display = 'flex';
+    const name = url.includes('folders') ? 'Pasta do Drive' : 'Arquivo do Drive';
+    document.getElementById('md-drive-name').textContent = name;
+    document.getElementById('md-drive-open').onclick = () => window.open(url, '_blank');
+  } else {
+    prev.style.display = 'none';
+  }
+}
+
+function closeDetail() {
+  document.getElementById('detailOverlay').classList.remove('open');
+  document.getElementById('statusDD').classList.remove('open');
+  currentTaskId = null;
+}
+function closeDetailOutside(e) {
+  if (e.target === document.getElementById('detailOverlay')) closeDetail();
+}
+
+function saveTask() {
+  if (!currentTaskId) return;
+  const t = tasks.find(x => x.id === currentTaskId);
+  if (!t) return;
+  t.title = document.getElementById('md-title').value;
+  t.brief = document.getElementById('md-brief').value;
+  t.prazo = document.getElementById('md-prazo').value;
+  t.valor = document.getElementById('md-valor').value;
+  t.cliente = document.getElementById('md-cliente').value;
+  t.drive = document.getElementById('md-drive').value;
+  t.prog = parseInt(document.getElementById('md-prog').value);
+  t.paid = paid;
+  t.rev = revCount;
+  t.types = Array.from(document.querySelectorAll('#md-types .type-chip')).filter(el => el.className.includes('sel')).map(el => el.dataset.type);
+  const urgSel = document.querySelector('#md-urg .urg-chip[class*="sel-"]');
+  t.urg = urgSel ? urgSel.dataset.u : '';
+  t.tags = Array.from(document.querySelectorAll('#md-tags .tag-item')).map(el => el.querySelector('span').textContent);
+  const sLabel = document.getElementById('md-sLabel').textContent;
+  const col = COLS.find(c => c.name === sLabel);
+  if (col) t.colId = col.id;
+  closeDetail();
+  renderKanban();
+  if (currentView === 'lista') renderList();
+  if (currentView === 'financeiro') renderFinanceiro();
+  showToast('Tarefa salva com sucesso!');
+}
+
+function deleteTask() {
+  if (!currentTaskId) return;
+  tasks = tasks.filter(x => x.id !== currentTaskId);
+  closeDetail();
+  renderKanban();
+  if (currentView === 'lista') renderList();
+  if (currentView === 'financeiro') renderFinanceiro();
+  showToast('Tarefa excluída.');
+}
+
+// ── NEW TASK ──
+function openNew(colId) {
+  document.getElementById('new-title').value = '';
+  document.getElementById('new-brief').value = '';
+  document.getElementById('new-cliente').value = '';
+  document.getElementById('new-valor').value = '';
+  document.getElementById('new-prazo').value = '';
+  document.getElementById('new-drive').value = '';
+  document.getElementById('new-status').value = colId !== undefined ? colId : 0;
+  document.querySelectorAll('#new-types .type-chip, #new-urg .urg-chip').forEach(el => {
+    el.className = el.className.replace(/sel[\w-]*/g, '').trim();
+  });
+  document.getElementById('newOverlay').classList.add('open');
+}
+function closeNew() { document.getElementById('newOverlay').classList.remove('open'); }
+function closeNewOutside(e) { if (e.target === document.getElementById('newOverlay')) closeNew(); }
+
+function createTask() {
+  const title = document.getElementById('new-title').value.trim();
+  if (!title) { document.getElementById('new-title').focus(); return; }
+  const types = Array.from(document.querySelectorAll('#new-types .type-chip')).filter(el => el.className.includes('sel')).map(el => el.dataset.type);
+  const urgSel = document.querySelector('#new-urg .urg-chip[class*="sel-"]');
+  const colId = parseInt(document.getElementById('new-status').value);
+  const now = new Date();
+  const created = now.toLocaleDateString('pt-BR', {day:'2-digit',month:'short',year:'numeric'});
+  tasks.push({
+    id: nextId++,
+    title,
+    brief: document.getElementById('new-brief').value,
+    types,
+    urg: urgSel ? urgSel.dataset.u : 'Baixa',
+    prazo: document.getElementById('new-prazo').value,
+    valor: document.getElementById('new-valor').value,
+    colId,
+    cliente: document.getElementById('new-cliente').value,
+    drive: document.getElementById('new-drive').value,
+    comments: [],
+    tags: [],
+    rev: 0,
+    prog: 0,
+    paid: false,
+    created,
+  });
+  closeNew();
+  renderKanban();
+  showToast('Demanda criada!');
+}
+
+// ── COMMENTS ──
+function renderComments(comments) {
+  const container = document.getElementById('md-comments');
+  container.innerHTML = '';
+  (comments || []).forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'comment-item';
+    div.innerHTML = `
+      <div class="comment-av ${c.mine ? 'av-me' : 'av-cl'}">${c.av}</div>
+      <div class="comment-bubble ${c.mine ? 'mine' : ''}">
+        <div class="comment-meta"><span class="comment-author">${c.name}</span><span>${c.time}</span></div>
+        <div class="comment-text">${c.text}</div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+  container.scrollTop = container.scrollHeight;
+}
+function sendComment() {
+  const ta = document.getElementById('md-comment-input');
+  const txt = ta.value.trim();
+  if (!txt || !currentTaskId) return;
+  const t = tasks.find(x => x.id === currentTaskId);
+  const now = new Date();
+  const time = 'hoje ' + now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  t.comments.push({ av:'VC', name:'Você', text:txt, mine:true, time });
+  renderComments(t.comments);
+  ta.value = '';
+}
+
+// ── STATUS ──
+let currentColId = 2;
+function toggleStatusDD() {
+  document.getElementById('statusDD').classList.toggle('open');
+}
+function setStatus(name, dot, colId) {
+  currentColId = colId;
+  document.getElementById('md-sLabel').textContent = name;
+  document.getElementById('md-sDot').style.background = dot;
+  document.getElementById('md-statusDot').style.background = dot;
+  document.getElementById('statusDD').classList.remove('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.status-select-wrap')) document.getElementById('statusDD').classList.remove('open');
+});
+
+// ── TYPE/URG CHIPS ──
+function toggleType(el) { el.classList.toggle(el.dataset.sel); }
+function toggleUrg(el) {
+  el.closest('.urg-row').querySelectorAll('.urg-chip').forEach(c => c.className = 'urg-chip');
+  el.classList.add(el.dataset.sel);
+}
+
+// ── PROGRESS ──
+function updateProgress(v) {
+  document.getElementById('md-pfill').style.width = v + '%';
+  document.getElementById('md-ppct').textContent = v + '%';
+}
+
+// ── PAY ──
+function togglePay() {
+  paid = !paid;
+  updatePayBtn();
+}
+function updatePayBtn() {
+  const btn = document.getElementById('md-payBtn');
+  if (paid) { btn.textContent = 'Pago'; btn.classList.add('paid'); }
+  else { btn.textContent = 'Pendente'; btn.classList.remove('paid'); }
+}
+
+// ── REVISIONS ──
+function renderRevDots() {
+  const c = document.getElementById('md-revDots');
+  c.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const d = document.createElement('span');
+    d.className = 'rev-d' + (i < revCount ? ' on' : '');
+    c.appendChild(d);
+  }
+}
+function addRev() { if (revCount < 3) { revCount++; renderRevDots(); } }
+function rmRev()  { if (revCount > 0) { revCount--; renderRevDots(); } }
+
+// ── TAGS ──
+function renderTags(tags) {
+  const wrap = document.getElementById('md-tags');
+  wrap.innerHTML = '';
+  tags.forEach(t => {
+    const span = document.createElement('span');
+    span.className = 'tag-item';
+    span.innerHTML = `<span>${t}</span><span class="tag-x" onclick="removeTag(this)">✕</span>`;
+    wrap.appendChild(span);
+  });
+}
+function removeTag(el) { el.closest('.tag-item').remove(); }
+function addTag(e) {
+  if (e.key === 'Enter') {
+    const inp = document.getElementById('md-tagInput');
+    const v = inp.value.trim();
+    if (!v) return;
+    const span = document.createElement('span');
+    span.className = 'tag-item';
+    span.innerHTML = `<span>${v}</span><span class="tag-x" onclick="removeTag(this)">✕</span>`;
+    document.getElementById('md-tags').appendChild(span);
+    inp.value = '';
+    e.preventDefault();
+  }
+}
+
+// ── VIEW NAV ──
+let currentView = 'kanban';
+
+function setView(v) {
+  currentView = v;
+  document.getElementById('nav-kanban').classList.toggle('active', v === 'kanban');
+  document.getElementById('nav-lista').classList.toggle('active', v === 'lista');
+  document.getElementById('nav-financeiro').classList.toggle('active', v === 'financeiro');
+  document.getElementById('kanban').style.display = v === 'kanban' ? 'flex' : 'none';
+  document.getElementById('listView').style.display = v === 'lista' ? 'block' : 'none';
+  document.getElementById('finView').style.display = v === 'financeiro' ? 'block' : 'none';
+
+  // stats-row + filters only for kanban/lista
+  const statsRow = document.querySelector('.stats-row');
+  const topbarRight = document.querySelector('.topbar-right');
+  statsRow.style.display = v === 'financeiro' ? 'none' : '';
+  topbarRight.style.display = v === 'financeiro' ? 'none' : '';
+
+  const titles = { kanban: 'Kanban', lista: 'Lista', financeiro: 'Financeiro' };
+  document.querySelector('.topbar-title').textContent = titles[v] || v;
+
+  if (v === 'lista') renderList();
+  else if (v === 'kanban') renderKanban();
+  else if (v === 'financeiro') renderFinanceiro();
+}
+
+function renderList() {
+  const fType = document.getElementById('filterType').value;
+  const fUrg = document.getElementById('filterUrg').value;
+  const lv = document.getElementById('listView');
+  lv.innerHTML = '';
+
+  // Options HTML for status select
+  const statusOptions = COLS.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+  COLS.forEach(col => {
+    let colTasks = tasks.filter(t => t.colId === col.id);
+    if (fType) colTasks = colTasks.filter(t => t.types.includes(fType));
+    if (fUrg) colTasks = colTasks.filter(t => t.urg === fUrg);
+
+    const section = document.createElement('div');
+    section.className = 'list-section';
+    section.dataset.colId = col.id;
+
+    const toggle = document.createElement('div');
+    toggle.className = 'list-section-toggle';
+    const arrowId = 'arrow-'+col.id;
+    const bodyId = 'lbody-'+col.id;
+    toggle.innerHTML = `
+      <span class="list-section-arrow open" id="${arrowId}">▶</span>
+      <span class="list-group-dot" style="background:${col.dot}"></span>
+      <span class="list-group-name">${col.name}</span>
+      <span class="list-group-count">${colTasks.length}</span>
+    `;
+    toggle.onclick = () => {
+      const body = document.getElementById(bodyId);
+      const arrow = document.getElementById(arrowId);
+      const isOpen = arrow.classList.contains('open');
+      arrow.classList.toggle('open', !isOpen);
+      body.style.display = isOpen ? 'none' : 'block';
+    };
+
+    const body = document.createElement('div');
+    body.id = bodyId;
+
+    // Drop zone for this section
+    section.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      section.style.outline = '2px dashed var(--accent)';
+      section.style.outlineOffset = '-2px';
+    });
+    section.addEventListener('dragleave', e => {
+      if (!section.contains(e.relatedTarget)) {
+        section.style.outline = '';
+      }
+    });
+    section.addEventListener('drop', e => {
+      e.preventDefault();
+      section.style.outline = '';
+      const taskId = parseInt(e.dataTransfer.getData('text/plain'));
+      const task = tasks.find(t => t.id === taskId);
+      if (task && task.colId !== col.id) {
+        task.colId = col.id;
+        renderList();
+        updateStats();
+        showToast(`Movido para "${col.name}"`);
+      }
+    });
+
+    if (colTasks.length === 0) {
+      body.innerHTML = '<div class="list-empty">Nenhuma demanda nesta coluna</div>';
+    } else {
+      const table = document.createElement('table');
+      table.className = 'list-table';
+      table.innerHTML = `<thead><tr>
+        <th style="width:28px"></th>
+        <th style="width:200px">Título</th>
+        <th>Status</th>
+        <th>Cliente</th>
+        <th>Tipo</th>
+        <th>Urgência</th>
+        <th>Prazo</th>
+        <th>Valor</th>
+        <th>Revisões</th>
+        <th>Pagamento</th>
+      </tr></thead><tbody id="tbody-${col.id}"></tbody>`;
+      body.appendChild(table);
+
+      const tbody = table.querySelector('tbody');
+      colTasks.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.setAttribute('draggable', 'true');
+        tr.dataset.taskId = t.id;
+
+        let dateStr = '', dateCls = 'lt-prazo';
+        if (t.prazo) {
+          if (isToday(t.prazo)) { dateStr = 'Hoje'; dateCls += ' late'; }
+          else if (isLate(t.prazo)) { dateStr = formatDate(t.prazo); dateCls += ' late'; }
+          else dateStr = formatDate(t.prazo);
+        }
+
+        const tagsHtml = t.types.map(tp => `<span class="tag ${TYPE_CLASS[tp]||''}">${tp}</span>`).join('');
+        const urgHtml = t.urg ? `<span class="tag ${URG_CLASS[t.urg]||''}">${t.urg}</span>` : '';
+        const revDots = [0,1,2].map(i => `<span class="lt-rev-d ${i < t.rev ? 'on' : ''}"></span>`).join('');
+        const driveIcon = t.drive ? `<span style="margin-left:5px;font-size:10px;color:var(--blue)" title="Drive anexado">▲</span>` : '';
+
+        const selOpts = COLS.map(c => `<option value="${c.id}" ${c.id === t.colId ? 'selected' : ''}>${c.name}</option>`).join('');
+
+        tr.innerHTML = `
+          <td><span class="lt-drag-handle" title="Arrastar">⠿</span></td>
+          <td class="lt-title"><span class="lt-title-text">${t.title}${driveIcon}</span></td>
+          <td class="lt-status-col"><select class="lt-status-select" data-taskid="${t.id}">${selOpts}</select></td>
+          <td class="lt-cliente">${t.cliente || '—'}</td>
+          <td><div class="lt-tags">${tagsHtml}</div></td>
+          <td>${urgHtml}</td>
+          <td class="${dateCls}">${dateStr || '—'}</td>
+          <td class="lt-valor">${t.valor ? 'R$'+t.valor : '—'}</td>
+          <td class="lt-rev">${revDots}<span style="margin-left:4px">${t.rev}/3</span></td>
+          <td class="lt-pay"><span class="lt-pay-badge ${t.paid ? 'paid' : 'unpaid'}">${t.paid ? 'Pago' : 'Pendente'}</span></td>
+        `;
+
+        // Row click to open detail (but not on select)
+        tr.addEventListener('click', e => {
+          if (!e.target.closest('select')) openDetail(t.id);
+        });
+
+        // Status select change
+        tr.querySelector('select').addEventListener('change', function(e) {
+          e.stopPropagation();
+          const newColId = parseInt(this.value);
+          const task = tasks.find(x => x.id === t.id);
+          if (task) {
+            task.colId = newColId;
+            renderList();
+            updateStats();
+            showToast(`Movido para "${COLS[newColId].name}"`);
+          }
+        });
+
+        // Drag events for row
+        tr.addEventListener('dragstart', e => {
+          e.dataTransfer.setData('text/plain', t.id);
+          e.dataTransfer.effectAllowed = 'move';
+          setTimeout(() => tr.classList.add('dragging'), 0);
+        });
+        tr.addEventListener('dragend', () => {
+          tr.classList.remove('dragging');
+          document.querySelectorAll('.list-section').forEach(s => s.style.outline = '');
+        });
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    section.appendChild(toggle);
+    section.appendChild(body);
+    lv.appendChild(section);
+  });
+}
+
+
+// ── FINANCEIRO ──
+function renderFinanceiro() {
+  const fv = document.getElementById('finView');
+  fv.innerHTML = '';
+
+  // ── Compute data ──
+  const totalRecebido = tasks.filter(t => t.paid && t.valor)
+    .reduce((s, t) => s + (parseFloat((t.valor||'0').replace(',','.')) || 0), 0);
+  const totalPendente = tasks.filter(t => !t.paid && t.valor)
+    .reduce((s, t) => s + (parseFloat((t.valor||'0').replace(',','.')) || 0), 0);
+  const totalGeral = totalRecebido + totalPendente;
+  const totalTarefas = tasks.length;
+
+  // Type breakdown
+  const typeMap = {};
+  tasks.forEach(t => {
+    (t.types || []).forEach(tp => {
+      if (!typeMap[tp]) typeMap[tp] = { count: 0, valor: 0, recebido: 0 };
+      typeMap[tp].count++;
+      const v = parseFloat((t.valor||'0').replace(',','.')) || 0;
+      typeMap[tp].valor += v;
+      if (t.paid) typeMap[tp].recebido += v;
+    });
+  });
+  const typeColors = {
+    'Social media': 'var(--accent)',
+    'Carrossel': 'var(--teal)',
+    'Story': 'var(--amber)',
+    'Thumbnail': 'var(--pink)',
+    'Reels': 'var(--blue)',
+  };
+  const maxCount = Math.max(...Object.values(typeMap).map(x => x.count), 1);
+
+  // Client breakdown
+  const clientMap = {};
+  tasks.forEach(t => {
+    const c = t.cliente || 'Sem cliente';
+    if (!clientMap[c]) clientMap[c] = { count: 0, valor: 0, recebido: 0, pendente: 0 };
+    clientMap[c].count++;
+    const v = parseFloat((t.valor||'0').replace(',','.')) || 0;
+    clientMap[c].valor += v;
+    if (t.paid) clientMap[c].recebido += v;
+    else clientMap[c].pendente += v;
+  });
+  const clientsSorted = Object.entries(clientMap).sort((a,b) => b[1].valor - a[1].valor);
+
+  // Pending tasks (unpaid with valor)
+  const pendingTasks = tasks.filter(t => !t.paid && t.valor).sort((a,b) => {
+    const av = parseFloat((a.valor||'0').replace(',','.')) || 0;
+    const bv = parseFloat((b.valor||'0').replace(',','.')) || 0;
+    return bv - av;
+  });
+
+  function fmt(v) {
+    return 'R$' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  // ── Build donut SVG ──
+  function buildDonut(received, pending) {
+    const total = received + pending || 1;
+    const r = 48, cx = 56, cy = 56, stroke = 14;
+    const circ = 2 * Math.PI * r;
+    const recvPct = received / total;
+    const pendPct = pending / total;
+    const gap = 0.015;
+    const recvDash = (recvPct - gap) * circ;
+    const pendDash = (pendPct - gap) * circ;
+    const recvOffset = 0;
+    const pendOffset = -(recvPct * circ);
+    return `<svg class="fin-donut-svg" width="112" height="112" viewBox="0 0 112 112">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--bg4)" stroke-width="${stroke}"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--green)" stroke-width="${stroke}"
+        stroke-dasharray="${recvDash} ${circ}"
+        stroke-dashoffset="${recvOffset}"
+        stroke-linecap="round"
+        transform="rotate(-90 ${cx} ${cy})"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--amber)" stroke-width="${stroke}"
+        stroke-dasharray="${pendDash} ${circ}"
+        stroke-dashoffset="${pendOffset}"
+        stroke-linecap="round"
+        transform="rotate(-90 ${cx} ${cy})"/>
+      <text x="${cx}" y="${cy - 5}" text-anchor="middle" font-family="'Funnel Display',sans-serif" font-size="13" font-weight="700" fill="var(--text0)">${Math.round(recvPct * 100)}%</text>
+      <text x="${cx}" y="${cy + 12}" text-anchor="middle" font-family="'Funnel Sans',sans-serif" font-size="9" fill="var(--text3)">recebido</text>
+    </svg>`;
+  }
+
+  // ── Hero cards ──
+  const heroHtml = `
+    <div class="fin-hero">
+      <div class="fin-hero-card c-green">
+        <div class="fin-hero-label">Total recebido</div>
+        <div class="fin-hero-value">${fmt(totalRecebido)}</div>
+        <div class="fin-hero-sub">${tasks.filter(t=>t.paid).length} demanda${tasks.filter(t=>t.paid).length!==1?'s':''} pagas</div>
+      </div>
+      <div class="fin-hero-card c-amber">
+        <div class="fin-hero-label">A receber</div>
+        <div class="fin-hero-value">${fmt(totalPendente)}</div>
+        <div class="fin-hero-sub">${tasks.filter(t=>!t.paid && t.valor).length} demanda${tasks.filter(t=>!t.paid && t.valor).length!==1?'s':''} pendentes</div>
+      </div>
+      <div class="fin-hero-card c-purple">
+        <div class="fin-hero-label">Faturamento total</div>
+        <div class="fin-hero-value">${fmt(totalGeral)}</div>
+        <div class="fin-hero-sub">em ${totalTarefas} demanda${totalTarefas!==1?'s':''}</div>
+      </div>
+      <div class="fin-hero-card c-blue">
+        <div class="fin-hero-label">Ticket médio</div>
+        <div class="fin-hero-value">${fmt(totalTarefas ? totalGeral / totalTarefas : 0)}</div>
+        <div class="fin-hero-sub">por demanda</div>
+      </div>
+    </div>`;
+
+  // ── Breakdown + donut row ──
+  const typeRowsHtml = Object.entries(typeMap).sort((a,b)=>b[1].count-a[1].count).map(([tp, data]) => `
+    <div class="type-bar-row">
+      <div class="type-bar-label">${tp}</div>
+      <div class="type-bar-track">
+        <div class="type-bar-fill" style="width:${(data.count/maxCount)*100}%;background:${typeColors[tp]||'var(--accent)'}"></div>
+      </div>
+      <div class="type-bar-meta"><strong>${data.count}</strong> · ${fmt(data.valor)}</div>
+    </div>`).join('') || '<div class="fin-empty">Nenhum dado</div>';
+
+  const donutHtml = buildDonut(totalRecebido, totalPendente);
+  const legendHtml = `
+    <div class="fin-donut-legend">
+      <div class="fin-legend-item"><span class="fin-legend-dot" style="background:var(--green)"></span>Recebido<span class="fin-legend-val">${fmt(totalRecebido)}</span></div>
+      <div class="fin-legend-item"><span class="fin-legend-dot" style="background:var(--amber)"></span>Pendente<span class="fin-legend-val">${fmt(totalPendente)}</span></div>
+      <div class="fin-legend-item" style="margin-top:4px;padding-top:8px;border-top:1px solid var(--line)"><span class="fin-legend-dot" style="background:var(--bg5)"></span>Total<span class="fin-legend-val">${fmt(totalGeral)}</span></div>
+    </div>`;
+
+  // ── Client rows ──
+  const clientRowsHtml = clientsSorted.length ? clientsSorted.map(([name, d]) => `
+    <tr>
+      <td class="fin-client-name">${name}</td>
+      <td>${d.count}</td>
+      <td style="color:var(--green);font-weight:500">${fmt(d.recebido)}</td>
+      <td style="color:var(--amber);font-weight:500">${fmt(d.pendente)}</td>
+      <td style="font-weight:600;color:var(--text0)">${fmt(d.valor)}</td>
+    </tr>`).join('') : '<tr><td colspan="5" class="fin-empty">Nenhum cliente</td></tr>';
+
+  // ── Pending tasks rows ──
+  const pendingRowsHtml = pendingTasks.length ? pendingTasks.map(t => {
+    const col = COLS.find(c => c.id === t.colId);
+    const tagsHtml = (t.types||[]).map(tp => `<span class="tag ${TYPE_CLASS[tp]||''}" style="font-size:9px;padding:1px 6px">${tp}</span>`).join('');
+    const v = parseFloat((t.valor||'0').replace(',','.')) || 0;
+    return `<tr onclick="openDetail(${t.id})">
+      <td class="ft-title">${t.title}</td>
+      <td><div style="display:flex;gap:3px;justify-content:flex-end;flex-wrap:wrap">${tagsHtml}</div></td>
+      <td>${t.cliente || '—'}</td>
+      <td><span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:${col?.dot||'#888'}">
+        <span style="width:5px;height:5px;border-radius:50%;background:${col?.dot||'#888'};display:inline-block"></span>
+        ${col?.name||'—'}
+      </span></td>
+      <td style="color:var(--amber);font-weight:600">${fmt(v)}</td>
+      <td><button class="pay-pill unpaid" onclick="event.stopPropagation();markPaid(${t.id})">Marcar pago</button></td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="6" class="fin-empty">🎉 Tudo recebido!</td></tr>';
+
+  // ── Paid tasks rows ──
+  const paidTasks = tasks.filter(t => t.paid && t.valor).sort((a,b) => {
+    const av = parseFloat((a.valor||'0').replace(',','.')) || 0;
+    const bv = parseFloat((b.valor||'0').replace(',','.')) || 0;
+    return bv - av;
+  });
+  const paidRowsHtml = paidTasks.length ? paidTasks.map(t => {
+    const tagsHtml = (t.types||[]).map(tp => `<span class="tag ${TYPE_CLASS[tp]||''}" style="font-size:9px;padding:1px 6px">${tp}</span>`).join('');
+    const v = parseFloat((t.valor||'0').replace(',','.')) || 0;
+    return `<tr onclick="openDetail(${t.id})">
+      <td class="ft-title">${t.title}</td>
+      <td><div style="display:flex;gap:3px;justify-content:flex-end;flex-wrap:wrap">${tagsHtml}</div></td>
+      <td>${t.cliente || '—'}</td>
+      <td style="color:var(--green);font-weight:600">${fmt(v)}</td>
+      <td><span class="pay-pill paid">✓ Recebido</span></td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="5" class="fin-empty">Nenhum pagamento recebido</td></tr>';
+
+  fv.innerHTML = `
+    ${heroHtml}
+
+    <div class="fin-grid">
+      <div class="fin-panel">
+        <div class="fin-panel-head">
+          <span class="fin-panel-title">Materiais produzidos</span>
+          <span class="fin-panel-sub">${totalTarefas} no total</span>
+        </div>
+        <div class="fin-panel-body">${typeRowsHtml}</div>
+      </div>
+      <div class="fin-panel">
+        <div class="fin-panel-head">
+          <span class="fin-panel-title">Recebido vs. Pendente</span>
+          <span class="fin-panel-sub">${fmt(totalGeral)} total</span>
+        </div>
+        <div class="fin-panel-body">
+          <div class="fin-donut-wrap">${donutHtml}${legendHtml}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fin-grid" style="grid-template-columns:1fr">
+      <div class="fin-panel">
+        <div class="fin-panel-head">
+          <span class="fin-panel-title">Por cliente</span>
+          <span class="fin-panel-sub">${clientsSorted.length} clientes</span>
+        </div>
+        <div class="fin-panel-body" style="padding-top:0">
+          <table class="fin-client-table">
+            <thead><tr>
+              <th>Cliente</th>
+              <th style="text-align:right">Demandas</th>
+              <th style="text-align:right">Recebido</th>
+              <th style="text-align:right">Pendente</th>
+              <th style="text-align:right">Total</th>
+            </tr></thead>
+            <tbody>${clientRowsHtml}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="fin-grid" style="grid-template-columns:1fr">
+      <div class="fin-panel">
+        <div class="fin-panel-head">
+          <span class="fin-panel-title">Pagamentos pendentes</span>
+          <span class="fin-panel-sub" style="color:var(--amber)">${fmt(totalPendente)} a receber</span>
+        </div>
+        <div class="fin-panel-body" style="padding-top:0">
+          <table class="fin-tasks-table">
+            <thead><tr>
+              <th style="text-align:left">Demanda</th>
+              <th>Tipo</th>
+              <th>Cliente</th>
+              <th>Status</th>
+              <th>Valor</th>
+              <th>Ação</th>
+            </tr></thead>
+            <tbody>${pendingRowsHtml}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="fin-grid" style="grid-template-columns:1fr">
+      <div class="fin-panel">
+        <div class="fin-panel-head">
+          <span class="fin-panel-title">Pagamentos recebidos</span>
+          <span class="fin-panel-sub" style="color:var(--green)">${fmt(totalRecebido)} recebido</span>
+        </div>
+        <div class="fin-panel-body" style="padding-top:0">
+          <table class="fin-tasks-table">
+            <thead><tr>
+              <th style="text-align:left">Demanda</th>
+              <th>Tipo</th>
+              <th>Cliente</th>
+              <th>Valor</th>
+              <th>Status</th>
+            </tr></thead>
+            <tbody>${paidRowsHtml}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function markPaid(id) {
+  const t = tasks.find(x => x.id === id);
+  if (t) {
+    t.paid = true;
+    renderFinanceiro();
+    updateStats();
+    showToast('Pagamento confirmado!');
+  }
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+renderKanban();
+</script>
+</body>
+</html>
