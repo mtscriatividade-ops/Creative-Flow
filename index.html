@@ -190,6 +190,7 @@ input, textarea, select, button { font-family: var(--font-body); }
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-height: 0;
 }
 
 /* ── TOPBAR ── */
@@ -282,6 +283,7 @@ input, textarea, select, button { font-family: var(--font-body); }
   padding: 18px;
   display: flex;
   gap: 12px;
+  min-height: 0;
 }
 .col {
   min-width: 200px;
@@ -842,7 +844,9 @@ input[type=range] {
 .list-wrap {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 18px 22px;
+  min-height: 0;
 }
 .list-table {
   width: 100%;
@@ -1011,10 +1015,11 @@ input[type=range] {
 .fin-wrap {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 22px 24px;
-  display: none;
+  min-height: 0;
+  box-sizing: border-box;
 }
-.fin-wrap.active { display: block; }
 
 .fin-hero {
   display: grid;
@@ -1065,6 +1070,7 @@ input[type=range] {
   grid-template-columns: 1fr 1fr;
   gap: 14px;
   margin-bottom: 18px;
+  min-width: 0;
 }
 .fin-grid.wide { grid-template-columns: 1fr; }
 
@@ -1073,6 +1079,8 @@ input[type=range] {
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 .fin-panel-head {
   display: flex;
@@ -1080,6 +1088,7 @@ input[type=range] {
   justify-content: space-between;
   padding: 14px 18px;
   border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
 }
 .fin-panel-title {
   font-family: var(--font-display);
@@ -1089,7 +1098,15 @@ input[type=range] {
   letter-spacing: -0.2px;
 }
 .fin-panel-sub { font-size: 11px; color: var(--text3); }
-.fin-panel-body { padding: 14px 18px; }
+.fin-panel-body {
+  padding: 14px 18px;
+  overflow-x: auto;
+}
+.fin-panel.scrollable .fin-panel-body {
+  max-height: 340px;
+  overflow-y: auto;
+  overflow-x: auto;
+}
 
 /* Type breakdown bars */
 .type-bar-row {
@@ -1111,16 +1128,20 @@ input[type=range] {
 .type-bar-meta { font-size: 11px; color: var(--text2); min-width: 70px; text-align: right; }
 
 /* Client table */
-.fin-client-table { width: 100%; border-collapse: collapse; }
+.fin-client-table { width: 100%; border-collapse: collapse; min-width: 400px; }
 .fin-client-table th {
   font-size: 10px;
   font-weight: 500;
   color: var(--text3);
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  padding: 0 0 8px 0;
+  padding: 8px 0;
   text-align: left;
   border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  background: var(--bg1);
+  z-index: 2;
 }
 .fin-client-table th:not(:first-child) { text-align: right; }
 .fin-client-table td {
@@ -1145,17 +1166,21 @@ input[type=range] {
 .fin-client-badge.unpaid { background: var(--amber-dim); color: var(--amber); }
 
 /* Tasks table */
-.fin-tasks-table { width: 100%; border-collapse: collapse; }
+.fin-tasks-table { width: 100%; border-collapse: collapse; min-width: 520px; }
 .fin-tasks-table th {
   font-size: 10px;
   font-weight: 500;
   color: var(--text3);
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  padding: 0 8px 8px;
+  padding: 8px 8px;
   text-align: left;
   border-bottom: 1px solid var(--line);
   white-space: nowrap;
+  position: sticky;
+  top: 0;
+  background: var(--bg1);
+  z-index: 2;
 }
 .fin-tasks-table th:not(:first-child) { text-align: right; }
 .fin-tasks-table td {
@@ -1397,6 +1422,167 @@ input[type=range] {
 /* Avatar with photo support */
 .avatar.has-photo { background: transparent; border-color: var(--accent); padding: 0; overflow: hidden; }
 .avatar.has-photo img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+/* ── STICKY NOTES ── */
+.sticky-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 300;
+}
+.sticky-note {
+  position: absolute;
+  pointer-events: all;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.3);
+  min-width: 160px;
+  min-height: 120px;
+  overflow: hidden;
+  transition: box-shadow .15s;
+  user-select: none;
+}
+.sticky-note:hover {
+  box-shadow: 0 12px 40px rgba(0,0,0,0.55), 0 4px 12px rgba(0,0,0,0.35);
+}
+.sticky-note.dragging-note {
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  transform: rotate(1.5deg) scale(1.02);
+  z-index: 9999 !important;
+  transition: none;
+}
+.sticky-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px 6px;
+  cursor: grab;
+  flex-shrink: 0;
+  gap: 6px;
+}
+.sticky-head:active { cursor: grabbing; }
+.sticky-title-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(0,0,0,0.7);
+  min-width: 0;
+  cursor: text;
+}
+.sticky-title-input::placeholder { color: rgba(0,0,0,0.35); }
+.sticky-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.sticky-btn {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.12);
+  color: rgba(0,0,0,0.55);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  transition: background .12s, color .12s;
+  flex-shrink: 0;
+}
+.sticky-btn:hover { background: rgba(0,0,0,0.22); color: rgba(0,0,0,0.8); }
+.sticky-body {
+  flex: 1;
+  padding: 4px 10px 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.sticky-textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgba(0,0,0,0.75);
+  width: 100%;
+  cursor: text;
+  user-select: text;
+}
+.sticky-textarea::placeholder { color: rgba(0,0,0,0.3); }
+.sticky-resize {
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 18px; height: 18px;
+  cursor: nwse-resize;
+  display: flex; align-items: flex-end; justify-content: flex-end;
+  padding: 3px;
+  opacity: 0;
+  transition: opacity .15s;
+}
+.sticky-note:hover .sticky-resize { opacity: 1; }
+.sticky-resize svg { pointer-events: none; }
+
+/* Color palette strip */
+.sticky-colors {
+  display: flex;
+  gap: 5px;
+  padding: 5px 10px 7px;
+  flex-shrink: 0;
+  border-top: 1px solid rgba(0,0,0,0.08);
+}
+.sticky-swatch {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform .12s, border-color .12s;
+  flex-shrink: 0;
+}
+.sticky-swatch:hover { transform: scale(1.25); }
+.sticky-swatch.active { border-color: rgba(0,0,0,0.4); transform: scale(1.15); }
+
+/* FAB to add sticky */
+.sticky-fab {
+  position: fixed;
+  bottom: 22px;
+  left: 232px;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-md);
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  color: var(--text2);
+  cursor: pointer;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.sticky-fab:hover {
+  background: var(--bg4);
+  border-color: var(--accent);
+  color: var(--accent2);
+}
+.sticky-fab:active { transform: scale(.94); }
+.sticky-fab-tooltip {
+  position: fixed;
+  bottom: 28px;
+  left: 272px;
+  background: var(--bg2);
+  border: 1px solid var(--line2);
+  border-radius: var(--r-md);
+  padding: 5px 10px;
+  font-size: 11px;
+  color: var(--text1);
+  pointer-events: none;
+  opacity: 0;
+  white-space: nowrap;
+  z-index: 401;
+  transition: opacity .15s;
+}
+.sticky-fab:hover + .sticky-fab-tooltip { opacity: 1; }
 </style>
 </head>
 <body>
@@ -1510,7 +1696,7 @@ input[type=range] {
     <div>
       <div class="topbar-title">Kanban</div>
     </div>
-    <span class="topbar-subtitle">12 demandas ativas · maio 2026</span>
+    <span class="topbar-subtitle" id="topbar-subtitle">0 demandas ativas · mai 2026</span>
     <div class="topbar-right">
       <select class="filter-select" id="filterType" onchange="filterCards()">
         <option value="">Todos os tipos</option>
@@ -1558,7 +1744,7 @@ input[type=range] {
 
   <div class="kanban-wrap" id="kanban"></div>
   <div class="list-wrap" id="listView" style="display:none"></div>
-  <div class="fin-wrap" id="finView"></div>
+  <div class="fin-wrap" id="finView" style="display:none"></div>
 </div>
 
 <!-- TASK DETAIL OVERLAY -->
@@ -1778,6 +1964,17 @@ input[type=range] {
   </div>
 </div>
 
+<!-- STICKY NOTES LAYER -->
+<div class="sticky-layer" id="stickyLayer"></div>
+<button class="sticky-fab" onclick="createSticky()" title="Nova nota adesiva">
+  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="1.5" y="1.5" width="9" height="13" rx="1.5" stroke="currentColor" stroke-width="1.3"/>
+    <path d="M10.5 10.5L14.5 14.5M10.5 10.5H13a1 1 0 001-1V4a1 1 0 00-1-1h-2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+    <path d="M4 5h4M4 8h4M4 11h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+  </svg>
+</button>
+<div class="sticky-fab-tooltip">Nova nota adesiva</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1996,7 +2193,19 @@ function updateStats() {
   const fmt = receber.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
   document.getElementById('st-receber').textContent = 'R$' + fmt;
 
-  // Update financial badge (unpaid tasks)
+  // Atualiza subtítulo do topbar
+  const months = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  const now = new Date();
+  const monthLabel = months[now.getMonth()] + ' ' + now.getFullYear();
+  const demandaLabel = active === 1 ? '1 demanda ativa' : `${active} demandas ativas`;
+  const sub = document.getElementById('topbar-subtitle');
+  if (sub) sub.textContent = `${demandaLabel} · ${monthLabel}`;
+
+  // Atualiza badge do Kanban na sidebar
+  const kanbanBadge = document.getElementById('nav-kanban-badge');
+  if (kanbanBadge) kanbanBadge.textContent = active;
+
+  // Atualiza badge financeiro (tarefas sem pagamento)
   const unpaidCount = tasks.filter(t => !t.paid && t.valor).length;
   const finBadge = document.getElementById('nav-fin-badge');
   if (finBadge) finBadge.textContent = unpaidCount;
@@ -2273,9 +2482,23 @@ function setView(v) {
   document.getElementById('nav-kanban').classList.toggle('active', v === 'kanban');
   document.getElementById('nav-lista').classList.toggle('active', v === 'lista');
   document.getElementById('nav-financeiro').classList.toggle('active', v === 'financeiro');
-  document.getElementById('kanban').style.display = v === 'kanban' ? 'flex' : 'none';
-  document.getElementById('listView').style.display = v === 'lista' ? 'block' : 'none';
-  document.getElementById('finView').style.display = v === 'financeiro' ? 'block' : 'none';
+
+  const kanbanEl = document.getElementById('kanban');
+  const listEl   = document.getElementById('listView');
+  const finEl    = document.getElementById('finView');
+
+  kanbanEl.style.display = v === 'kanban'     ? 'flex'  : 'none';
+  listEl.style.display   = v === 'lista'      ? 'flex'  : 'none';
+  finEl.style.display    = v === 'financeiro' ? 'flex'  : 'none';
+
+  // Ensure each scrollable view fills the remaining space
+  [listEl, finEl].forEach(el => {
+    el.style.flexDirection = 'column';
+    el.style.flex = '1';
+    el.style.minHeight = '0';
+    el.style.overflowY = 'auto';
+    el.style.overflowX = 'hidden';
+  });
 
   // stats-row + filters only for kanban/lista
   const statsRow = document.querySelector('.stats-row');
@@ -2647,9 +2870,7 @@ function renderFinanceiro() {
     </div>
 
     <div class="fin-grid" style="grid-template-columns:1fr">
-      <div class="fin-panel">
-        <div class="fin-panel-head">
-          <span class="fin-panel-title">Por cliente</span>
+      <div class="fin-panel scrollable">
           <span class="fin-panel-sub">${clientsSorted.length} clientes</span>
         </div>
         <div class="fin-panel-body" style="padding-top:0">
@@ -2668,7 +2889,7 @@ function renderFinanceiro() {
     </div>
 
     <div class="fin-grid" style="grid-template-columns:1fr">
-      <div class="fin-panel">
+      <div class="fin-panel scrollable">
         <div class="fin-panel-head">
           <span class="fin-panel-title">Pagamentos pendentes</span>
           <span class="fin-panel-sub" style="color:var(--amber)">${fmt(totalPendente)} a receber</span>
@@ -2690,7 +2911,7 @@ function renderFinanceiro() {
     </div>
 
     <div class="fin-grid" style="grid-template-columns:1fr">
-      <div class="fin-panel">
+      <div class="fin-panel scrollable">
         <div class="fin-panel-head">
           <span class="fin-panel-title">Pagamentos recebidos</span>
           <span class="fin-panel-sub" style="color:var(--green)">${fmt(totalRecebido)} recebido</span>
@@ -2883,6 +3104,245 @@ function saveProfile() {
 
 loadProfile();
 renderKanban();
+</script>
+<script>
+/* ══════════════════════════════════════
+   STICKY NOTES ENGINE
+══════════════════════════════════════ */
+const STICKY_KEY = 'creativeflow_stickies';
+
+const STICKY_COLORS = [
+  { id: 'yellow',  bg: '#FFF176', head: '#F9E84A' },
+  { id: 'green',   bg: '#CCFF90', head: '#ABED65' },
+  { id: 'blue',    bg: '#80D8FF', head: '#49C6F5' },
+  { id: 'pink',    bg: '#FF80AB', head: '#F74D8D' },
+  { id: 'orange',  bg: '#FFCC80', head: '#FFB347' },
+  { id: 'purple',  bg: '#CE93D8', head: '#B565CC' },
+  { id: 'red',     bg: '#FF8A80', head: '#F05252' },
+  { id: 'white',   bg: '#F5F5F5', head: '#E0E0E0' },
+];
+
+let stickies = [];
+let stickyZTop = 500;
+
+function loadStickies() {
+  try {
+    const saved = localStorage.getItem(STICKY_KEY);
+    if (saved) stickies = JSON.parse(saved);
+  } catch(e) { stickies = []; }
+  stickies.forEach(s => renderStickyEl(s));
+}
+
+function saveStickies() {
+  try { localStorage.setItem(STICKY_KEY, JSON.stringify(stickies)); } catch(e) {}
+}
+
+function createSticky() {
+  const id = 'sticky_' + Date.now();
+  // Scatter new notes slightly offset from center-ish area
+  const x = Math.round(260 + Math.random() * 400);
+  const y = Math.round(80  + Math.random() * 260);
+  const s = {
+    id,
+    x, y,
+    w: 220, h: 200,
+    color: 'yellow',
+    title: '',
+    text: '',
+    z: ++stickyZTop,
+  };
+  stickies.push(s);
+  saveStickies();
+  renderStickyEl(s);
+}
+
+function renderStickyEl(s) {
+  const col = STICKY_COLORS.find(c => c.id === s.color) || STICKY_COLORS[0];
+  const el = document.createElement('div');
+  el.className = 'sticky-note';
+  el.id = s.id;
+  el.style.cssText = `left:${s.x}px;top:${s.y}px;width:${s.w}px;height:${s.h}px;z-index:${s.z};background:${col.bg};`;
+
+  const swatchesHtml = STICKY_COLORS.map(c =>
+    `<span class="sticky-swatch${s.color===c.id?' active':''}"
+      data-cid="${c.id}"
+      style="background:${c.bg};border-color:${s.color===c.id?'rgba(0,0,0,0.4)':'transparent'}"
+      onclick="setStickyColor('${s.id}','${c.id}',this)"></span>`
+  ).join('');
+
+  el.innerHTML = `
+    <div class="sticky-head" style="background:${col.head}" data-drag>
+      <input class="sticky-title-input" placeholder="Título..." value="${escHtml(s.title)}"
+        oninput="updateStickyField('${s.id}','title',this.value)"
+        onmousedown="event.stopPropagation()"
+        ontouchstart="event.stopPropagation()">
+      <div class="sticky-actions">
+        <button class="sticky-btn" onclick="deleteSticky('${s.id}')" title="Excluir">
+          <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1 1l7 7M8 1L1 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="sticky-body">
+      <textarea class="sticky-textarea" placeholder="Escreva sua nota..."
+        onmousedown="event.stopPropagation()"
+        ontouchstart="event.stopPropagation()"
+        oninput="updateStickyField('${s.id}','text',this.value)">${escHtml(s.text)}</textarea>
+    </div>
+    <div class="sticky-colors">${swatchesHtml}</div>
+    <div class="sticky-resize" data-resize>
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path d="M11 1L1 11M11 6L6 11M11 11" stroke="rgba(0,0,0,0.35)" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+  `;
+
+  // Bring to front on click
+  el.addEventListener('mousedown', () => bringToFront(s.id));
+  el.addEventListener('touchstart', () => bringToFront(s.id), { passive: true });
+
+  // Drag
+  const head = el.querySelector('[data-drag]');
+  makeDraggable(el, head, s);
+
+  // Resize
+  const resizeHandle = el.querySelector('[data-resize]');
+  makeResizable(el, resizeHandle, s);
+
+  document.getElementById('stickyLayer').appendChild(el);
+}
+
+function escHtml(str) {
+  return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function bringToFront(id) {
+  const s = stickies.find(x => x.id === id);
+  if (!s) return;
+  s.z = ++stickyZTop;
+  document.getElementById(id).style.zIndex = s.z;
+  saveStickies();
+}
+
+function updateStickyField(id, field, value) {
+  const s = stickies.find(x => x.id === id);
+  if (s) { s[field] = value; saveStickies(); }
+}
+
+function setStickyColor(id, colorId, swatchEl) {
+  const s = stickies.find(x => x.id === id);
+  if (!s) return;
+  s.color = colorId;
+  saveStickies();
+  // Re-render
+  const old = document.getElementById(id);
+  if (old) old.remove();
+  renderStickyEl(s);
+  bringToFront(id);
+}
+
+function deleteSticky(id) {
+  stickies = stickies.filter(x => x.id !== id);
+  saveStickies();
+  const el = document.getElementById(id);
+  if (el) {
+    el.style.transition = 'opacity .18s, transform .18s';
+    el.style.opacity = '0';
+    el.style.transform = 'scale(0.85)';
+    setTimeout(() => el.remove(), 180);
+  }
+}
+
+/* ── DRAG ── */
+function makeDraggable(el, handle, s) {
+  let startX, startY, startLeft, startTop, active = false;
+
+  function onDown(ex, ey) {
+    active = true;
+    startX = ex; startY = ey;
+    startLeft = s.x; startTop = s.y;
+    el.classList.add('dragging-note');
+    bringToFront(s.id);
+  }
+  function onMove(ex, ey) {
+    if (!active) return;
+    const dx = ex - startX, dy = ey - startY;
+    s.x = Math.max(0, startLeft + dx);
+    s.y = Math.max(0, startTop  + dy);
+    el.style.left = s.x + 'px';
+    el.style.top  = s.y + 'px';
+  }
+  function onUp() {
+    if (!active) return;
+    active = false;
+    el.classList.remove('dragging-note');
+    saveStickies();
+  }
+
+  handle.addEventListener('mousedown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+    e.preventDefault();
+    onDown(e.clientX, e.clientY);
+    const mm = e2 => onMove(e2.clientX, e2.clientY);
+    const mu = () => { onUp(); window.removeEventListener('mousemove', mm); window.removeEventListener('mouseup', mu); };
+    window.addEventListener('mousemove', mm);
+    window.addEventListener('mouseup', mu);
+  });
+
+  handle.addEventListener('touchstart', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+    const t = e.touches[0];
+    onDown(t.clientX, t.clientY);
+    const tm = e2 => { const t2 = e2.touches[0]; onMove(t2.clientX, t2.clientY); };
+    const tu = () => { onUp(); window.removeEventListener('touchmove', tm); window.removeEventListener('touchend', tu); };
+    window.addEventListener('touchmove', tm, { passive: true });
+    window.addEventListener('touchend', tu);
+  }, { passive: true });
+}
+
+/* ── RESIZE ── */
+function makeResizable(el, handle, s) {
+  let startX, startY, startW, startH, active = false;
+
+  function onDown(ex, ey) {
+    active = true;
+    startX = ex; startY = ey;
+    startW = s.w; startH = s.h;
+    bringToFront(s.id);
+  }
+  function onMove(ex, ey) {
+    if (!active) return;
+    s.w = Math.max(160, startW + (ex - startX));
+    s.h = Math.max(120, startH + (ey - startY));
+    el.style.width  = s.w + 'px';
+    el.style.height = s.h + 'px';
+  }
+  function onUp() {
+    if (!active) return;
+    active = false;
+    saveStickies();
+  }
+
+  handle.addEventListener('mousedown', e => {
+    e.preventDefault(); e.stopPropagation();
+    onDown(e.clientX, e.clientY);
+    const mm = e2 => onMove(e2.clientX, e2.clientY);
+    const mu = () => { onUp(); window.removeEventListener('mousemove', mm); window.removeEventListener('mouseup', mu); };
+    window.addEventListener('mousemove', mm);
+    window.addEventListener('mouseup', mu);
+  });
+
+  handle.addEventListener('touchstart', e => {
+    e.stopPropagation();
+    const t = e.touches[0];
+    onDown(t.clientX, t.clientY);
+    const tm = e2 => { const t2 = e2.touches[0]; onMove(t2.clientX, t2.clientY); };
+    const tu = () => { onUp(); window.removeEventListener('touchmove', tm); window.removeEventListener('touchend', tu); };
+    window.addEventListener('touchmove', tm, { passive: true });
+    window.addEventListener('touchend', tu);
+  }, { passive: true });
+}
+
+loadStickies();
 </script>
 </body>
 </html>
