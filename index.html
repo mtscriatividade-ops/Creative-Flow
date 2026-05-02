@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CreativeFlow</title>
+<title>GridSpace</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&family=Funnel+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
@@ -1590,8 +1590,8 @@ input[type=range] {
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sidebar-logo">
-    <div class="logo-mark">CF</div>
-    <div class="logo-text">Creative<span>Flow</span></div>
+    <div class="logo-mark">GS</div>
+    <div class="logo-text">Grid<span>Space</span></div>
   </div>
   <div class="sidebar-section">
     <div class="sidebar-section-label">Workspace</div>
@@ -3080,6 +3080,7 @@ function selectAccent(el) {
   r.style.setProperty('--accent2',     el.dataset.accent2);
   r.style.setProperty('--accent-dim',  el.dataset.dim);
   r.style.setProperty('--accent-dim2', el.dataset.dim2);
+  updateFavicon(el.dataset.accent);
 }
 
 function handlePhotoUpload(e) {
