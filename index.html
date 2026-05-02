@@ -71,7 +71,8 @@ input, textarea, select, button { font-family: var(--font-body); }
   flex-direction: column;
   padding: 0;
   position: relative;
-  z-index: 10;
+  z-index: 200;
+  overflow: visible;
 }
 .sidebar-logo {
   padding: 20px 18px 16px;
@@ -155,6 +156,7 @@ input, textarea, select, button { font-family: var(--font-body); }
   margin-top: auto;
   padding: 12px 10px;
   border-top: 1px solid var(--line);
+  position: relative;
 }
 .user-row {
   display: flex;
@@ -1197,13 +1199,204 @@ input[type=range] {
 .fin-legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .fin-legend-val { margin-left: auto; font-weight: 500; color: var(--text0); }
 
-/* Empty state */
-.fin-empty {
-  text-align: center;
-  padding: 30px;
+.user-row { position: relative; }
+.user-settings-btn {
+  margin-left: auto;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--r-sm);
+  background: transparent;
+  border: 1px solid transparent;
   color: var(--text3);
-  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  transition: all .15s;
+  flex-shrink: 0;
 }
+.user-row:hover .user-settings-btn { border-color: var(--line2); color: var(--text2); background: var(--bg3); }
+
+/* ── PROFILE PANEL ── */
+.profile-panel {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 10px;
+  right: 10px;
+  background: var(--bg2);
+  border: 1px solid var(--line2);
+  border-radius: var(--r-lg);
+  padding: 16px;
+  z-index: 200;
+  box-shadow: 0 -8px 32px rgba(0,0,0,0.4);
+  display: none;
+  animation: slideUpPanel .18s ease;
+}
+.profile-panel.open { display: block; }
+@keyframes slideUpPanel {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.profile-panel-title {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text0);
+  margin-bottom: 14px;
+  letter-spacing: -0.2px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.profile-panel-close {
+  width: 20px; height: 20px;
+  border-radius: var(--r-sm);
+  background: var(--bg4);
+  border: none;
+  color: var(--text3);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  transition: all .15s;
+}
+.profile-panel-close:hover { color: var(--text0); background: var(--bg5); }
+
+/* Avatar uploader */
+.pp-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.pp-avatar-wrap { position: relative; cursor: pointer; flex-shrink: 0; }
+.pp-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 2px solid var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent2);
+  overflow: hidden;
+  font-family: var(--font-display);
+}
+.pp-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.pp-avatar-overlay {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0;
+  transition: opacity .15s;
+  font-size: 14px;
+}
+.pp-avatar-wrap:hover .pp-avatar-overlay { opacity: 1; }
+.pp-avatar-hint { font-size: 10px; color: var(--text3); line-height: 1.5; }
+.pp-avatar-hint strong { color: var(--accent2); font-weight: 500; }
+#pp-photo-input { display: none; }
+
+.pp-field { margin-bottom: 10px; }
+.pp-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text3);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.pp-input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--text0);
+  font-size: 12px;
+  padding: 6px 10px;
+  outline: none;
+  transition: border-color .15s;
+  font-family: var(--font-body);
+}
+.pp-input:focus { border-color: var(--accent); }
+
+/* Role chips */
+.pp-role-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 4px;
+}
+.pp-role-chip {
+  font-size: 10px;
+  padding: 3px 9px;
+  border-radius: 99px;
+  border: 1px solid var(--line2);
+  background: var(--bg3);
+  color: var(--text2);
+  cursor: pointer;
+  transition: all .15s;
+  font-family: var(--font-body);
+}
+.pp-role-chip:hover { border-color: var(--accent); color: var(--accent2); }
+.pp-role-chip.active { border-color: var(--accent); background: var(--accent-dim); color: var(--accent2); }
+.pp-custom-role { margin-top: 6px; }
+
+/* Color swatches */
+.pp-colors {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 6px;
+  margin-top: 4px;
+}
+.pp-swatch {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform .15s, border-color .15s;
+  position: relative;
+}
+.pp-swatch:hover { transform: scale(1.15); }
+.pp-swatch.active {
+  border-color: var(--text0);
+  box-shadow: 0 0 0 2px var(--bg2);
+}
+.pp-swatch.active::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: #fff;
+  font-weight: 700;
+}
+
+.pp-divider { height: 1px; background: var(--line); margin: 12px 0; }
+
+.pp-save-btn {
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-md);
+  padding: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: background .15s, transform .1s;
+}
+.pp-save-btn:hover { background: #6a5ce8; }
+.pp-save-btn:active { transform: scale(.98); }
+
+/* Avatar with photo support */
+.avatar.has-photo { background: transparent; border-color: var(--accent); padding: 0; overflow: hidden; }
+.avatar.has-photo img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
 </style>
 </head>
 <body>
@@ -1239,12 +1432,74 @@ input[type=range] {
     </div>
   </div>
   <div class="sidebar-bottom">
-    <div class="user-row">
-      <div class="avatar">VC</div>
-      <div>
-        <div class="user-name">Você</div>
-        <div class="user-role">Designer criativo</div>
+    <!-- PROFILE PANEL -->
+    <div class="profile-panel" id="profilePanel" onclick="event.stopPropagation()">
+      <div class="profile-panel-title">
+        Perfil & Aparência
+        <button class="profile-panel-close" onclick="event.stopPropagation();closeProfile()">✕</button>
       </div>
+
+      <!-- Avatar -->
+      <div class="pp-avatar-row">
+        <div class="pp-avatar-wrap" onclick="document.getElementById('pp-photo-input').click()">
+          <div class="pp-avatar" id="pp-avatar-preview">VC</div>
+          <div class="pp-avatar-overlay">📷</div>
+        </div>
+        <div class="pp-avatar-hint">Clique no avatar para<br><strong>trocar a foto</strong></div>
+        <input type="file" id="pp-photo-input" accept="image/*" onchange="handlePhotoUpload(event)">
+      </div>
+
+      <!-- Nome -->
+      <div class="pp-field">
+        <div class="pp-label">Nome</div>
+        <input type="text" class="pp-input" id="pp-name" placeholder="Seu nome...">
+      </div>
+
+      <!-- Cargo -->
+      <div class="pp-field">
+        <div class="pp-label">Cargo</div>
+        <div class="pp-role-grid" id="pp-role-grid">
+          <span class="pp-role-chip" onclick="selectRole(this,'Designer')">Designer</span>
+          <span class="pp-role-chip" onclick="selectRole(this,'Head')">Head</span>
+          <span class="pp-role-chip" onclick="selectRole(this,'Motion')">Motion</span>
+          <span class="pp-role-chip" onclick="selectRole(this,'Social Media')">Social Media</span>
+          <span class="pp-role-chip" onclick="selectRole(this,'Diretor criativo')">Diretor criativo</span>
+          <span class="pp-role-chip" onclick="selectRole(this,'Freelancer')">Freelancer</span>
+        </div>
+        <div class="pp-custom-role">
+          <input type="text" class="pp-input" id="pp-role-custom" placeholder="Ou escreva um cargo personalizado...">
+        </div>
+      </div>
+
+      <div class="pp-divider"></div>
+
+      <!-- Cor de destaque -->
+      <div class="pp-field" style="margin-bottom:12px">
+        <div class="pp-label">Cor de destaque</div>
+        <div class="pp-colors" id="pp-colors">
+          <div class="pp-swatch active" data-accent="#7c6dfa" data-accent2="#a594ff" data-dim="rgba(124,109,250,0.15)" data-dim2="rgba(124,109,250,0.08)" style="background:#7c6dfa" onclick="selectAccent(this)" title="Violeta"></div>
+          <div class="pp-swatch" data-accent="#3ecf8e" data-accent2="#6adba8" data-dim="rgba(62,207,142,0.15)" data-dim2="rgba(62,207,142,0.08)" style="background:#3ecf8e" onclick="selectAccent(this)" title="Verde"></div>
+          <div class="pp-swatch" data-accent="#4a9eff" data-accent2="#7ab8ff" data-dim="rgba(74,158,255,0.15)" data-dim2="rgba(74,158,255,0.08)" style="background:#4a9eff" onclick="selectAccent(this)" title="Azul"></div>
+          <div class="pp-swatch" data-accent="#f46a6a" data-accent2="#f79090" data-dim="rgba(244,106,106,0.15)" data-dim2="rgba(244,106,106,0.08)" style="background:#f46a6a" onclick="selectAccent(this)" title="Vermelho"></div>
+          <div class="pp-swatch" data-accent="#f5a623" data-accent2="#f8c06a" data-dim="rgba(245,166,35,0.15)" data-dim2="rgba(245,166,35,0.08)" style="background:#f5a623" onclick="selectAccent(this)" title="Âmbar"></div>
+          <div class="pp-swatch" data-accent="#e879a0" data-accent2="#ef9fbe" data-dim="rgba(232,121,160,0.15)" data-dim2="rgba(232,121,160,0.08)" style="background:#e879a0" onclick="selectAccent(this)" title="Rosa"></div>
+          <div class="pp-swatch" data-accent="#2dd4bf" data-accent2="#67e0d0" data-dim="rgba(45,212,191,0.15)" data-dim2="rgba(45,212,191,0.08)" style="background:#2dd4bf" onclick="selectAccent(this)" title="Teal"></div>
+          <div class="pp-swatch" data-accent="#c084fc" data-accent2="#d8a8fd" data-dim="rgba(192,132,252,0.15)" data-dim2="rgba(192,132,252,0.08)" style="background:#c084fc" onclick="selectAccent(this)" title="Lilás"></div>
+        </div>
+      </div>
+
+      <button class="pp-save-btn" onclick="event.stopPropagation();saveProfile()">Salvar alterações</button>
+    </div>
+
+    <div class="user-row" onclick="toggleProfile(event)">
+      <div class="avatar" id="sidebar-avatar">VC</div>
+      <div>
+        <div class="user-name" id="sidebar-name">Você</div>
+        <div class="user-role" id="sidebar-role">Designer criativo</div>
+      </div>
+      <button class="user-settings-btn" title="Configurações de perfil">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </button>
     </div>
   </div>
 </aside>
@@ -2474,6 +2729,159 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
+// ── PROFILE & ACCENT ──
+const PROFILE_KEY = 'creativeflow_profile';
+
+let profile = {
+  name: 'Você',
+  role: 'Designer criativo',
+  photo: null,
+  accent:  '#7c6dfa',
+  accent2: '#a594ff',
+  dim:     'rgba(124,109,250,0.15)',
+  dim2:    'rgba(124,109,250,0.08)',
+};
+
+function loadProfile() {
+  try {
+    const saved = localStorage.getItem(PROFILE_KEY);
+    if (saved) profile = { ...profile, ...JSON.parse(saved) };
+  } catch(e) {}
+  applyProfile();
+}
+
+function saveProfileData() {
+  try { localStorage.setItem(PROFILE_KEY, JSON.stringify(profile)); } catch(e) {}
+}
+
+function applyProfile() {
+  document.getElementById('sidebar-name').textContent = profile.name || 'Você';
+  document.getElementById('sidebar-role').textContent = profile.role || 'Designer criativo';
+
+  const sideAvatar = document.getElementById('sidebar-avatar');
+  const ppPreview  = document.getElementById('pp-avatar-preview');
+  const initials   = (profile.name || 'VC').trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0,2);
+
+  if (profile.photo) {
+    sideAvatar.innerHTML = `<img src="${profile.photo}" alt="avatar">`;
+    sideAvatar.classList.add('has-photo');
+    ppPreview.innerHTML  = `<img src="${profile.photo}" alt="avatar">`;
+  } else {
+    sideAvatar.innerHTML = initials;
+    sideAvatar.classList.remove('has-photo');
+    ppPreview.innerHTML  = initials;
+  }
+
+  const r = document.documentElement;
+  r.style.setProperty('--accent',      profile.accent);
+  r.style.setProperty('--accent2',     profile.accent2);
+  r.style.setProperty('--accent-dim',  profile.dim);
+  r.style.setProperty('--accent-dim2', profile.dim2);
+
+  document.querySelectorAll('.av-me').forEach(el => {
+    if (!el.querySelector('img')) el.textContent = initials;
+  });
+}
+
+function toggleProfile(e) {
+  if (e) e.stopPropagation();
+  const panel = document.getElementById('profilePanel');
+  const isOpen = panel.classList.contains('open');
+  if (!isOpen) {
+    // Populate fields with current values
+    document.getElementById('pp-name').value = profile.name || '';
+    document.getElementById('pp-role-custom').value = '';
+
+    const ppPreview = document.getElementById('pp-avatar-preview');
+    const initials  = (profile.name || 'VC').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    ppPreview.innerHTML = profile.photo ? `<img src="${profile.photo}" alt="avatar">` : initials;
+
+    document.querySelectorAll('.pp-role-chip').forEach(chip => {
+      chip.classList.toggle('active', chip.textContent === profile.role);
+    });
+    const presets = ['Designer','Head','Motion','Social Media','Diretor criativo','Freelancer'];
+    if (!presets.includes(profile.role)) {
+      document.getElementById('pp-role-custom').value = profile.role || '';
+    }
+
+    document.querySelectorAll('.pp-swatch').forEach(sw => {
+      sw.classList.toggle('active', sw.dataset.accent === profile.accent);
+    });
+
+    panel.classList.add('open');
+    // Register close-outside listener after a tick so this click doesn't trigger it
+    setTimeout(() => {
+      document.addEventListener('click', closeProfileOutside);
+    }, 0);
+  } else {
+    closeProfile();
+  }
+}
+
+function closeProfileOutside(e) {
+  const panel = document.getElementById('profilePanel');
+  if (panel && !panel.contains(e.target) && !e.target.closest('.sidebar-bottom')) {
+    closeProfile();
+  }
+}
+
+function closeProfile() {
+  document.getElementById('profilePanel').classList.remove('open');
+  document.removeEventListener('click', closeProfileOutside);
+}
+
+function selectRole(el, role) {
+  document.querySelectorAll('.pp-role-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('pp-role-custom').value = '';
+}
+
+function selectAccent(el) {
+  document.querySelectorAll('.pp-swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  const r = document.documentElement;
+  r.style.setProperty('--accent',      el.dataset.accent);
+  r.style.setProperty('--accent2',     el.dataset.accent2);
+  r.style.setProperty('--accent-dim',  el.dataset.dim);
+  r.style.setProperty('--accent-dim2', el.dataset.dim2);
+}
+
+function handlePhotoUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const dataUrl = ev.target.result;
+    document.getElementById('pp-avatar-preview').innerHTML = `<img src="${dataUrl}" alt="avatar">`;
+    profile._tempPhoto = dataUrl;
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveProfile() {
+  const name = document.getElementById('pp-name').value.trim() || 'Você';
+  const customRole = document.getElementById('pp-role-custom').value.trim();
+  const activeChip = document.querySelector('.pp-role-chip.active');
+  const role = customRole || (activeChip ? activeChip.textContent : profile.role) || 'Designer criativo';
+  const activeSwatch = document.querySelector('.pp-swatch.active');
+
+  profile.name = name;
+  profile.role = role;
+  if (profile._tempPhoto) { profile.photo = profile._tempPhoto; delete profile._tempPhoto; }
+  if (activeSwatch) {
+    profile.accent  = activeSwatch.dataset.accent;
+    profile.accent2 = activeSwatch.dataset.accent2;
+    profile.dim     = activeSwatch.dataset.dim;
+    profile.dim2    = activeSwatch.dataset.dim2;
+  }
+
+  saveProfileData();
+  applyProfile();
+  closeProfile();
+  showToast('Perfil atualizado!');
+}
+
+loadProfile();
 renderKanban();
 </script>
 </body>
