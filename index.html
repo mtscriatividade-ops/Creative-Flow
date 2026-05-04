@@ -1801,7 +1801,7 @@ input[type=range] {
             <input type="date" class="field-input" id="md-prazo">
           </div>
           <div>
-            <div class="field-label">Valor (R$)</div>
+            <div class="field-label">Valor</div>
             <input type="text" class="field-input" id="md-valor" placeholder="0,00">
           </div>
         </div>
@@ -1882,6 +1882,18 @@ input[type=range] {
         </div>
 
         <div class="side-field">
+          <div class="side-label">Moeda</div>
+          <select class="side-input" id="md-moeda">
+            <option value="BRL">BRL — Real (R$)</option>
+            <option value="USD">USD — Dólar ($)</option>
+            <option value="EUR">EUR — Euro (€)</option>
+            <option value="GBP">GBP — Libra (£)</option>
+            <option value="ARS">ARS — Peso AR ($)</option>
+            <option value="CAD">CAD — Dólar CA ($)</option>
+          </select>
+        </div>
+
+        <div class="side-field">
           <div class="side-label">Tags</div>
           <div class="tags-wrap" id="md-tags"></div>
           <input type="text" class="tag-add-input" id="md-tagInput" placeholder="+ nova tag (Enter)" onkeydown="addTag(event)">
@@ -1928,8 +1940,19 @@ input[type=range] {
         <input type="text" class="field-input" id="new-cliente" placeholder="Nome do cliente">
       </div>
       <div>
-        <div class="field-label">Valor (R$)</div>
+        <div class="field-label">Valor</div>
         <input type="text" class="field-input" id="new-valor" placeholder="0,00">
+      </div>
+      <div>
+        <div class="field-label">Moeda</div>
+        <select class="field-input" id="new-moeda">
+          <option value="BRL">BRL — Real (R$)</option>
+          <option value="USD">USD — Dólar ($)</option>
+          <option value="EUR">EUR — Euro (€)</option>
+          <option value="GBP">GBP — Libra (£)</option>
+          <option value="ARS">ARS — Peso AR ($)</option>
+          <option value="CAD">CAD — Dólar CA ($)</option>
+        </select>
       </div>
       <div>
         <div class="field-label">Prazo de entrega</div>
@@ -2232,6 +2255,7 @@ function openDetail(id) {
   document.getElementById('md-brief').value = t.brief;
   document.getElementById('md-prazo').value = t.prazo;
   document.getElementById('md-valor').value = t.valor;
+  document.getElementById('md-moeda').value = t.moeda || 'BRL';
   document.getElementById('md-cliente').value = t.cliente;
   document.getElementById('md-drive').value = t.drive;
   document.getElementById('md-prog').value = t.prog;
@@ -2292,6 +2316,7 @@ function saveTask() {
   t.brief = document.getElementById('md-brief').value;
   t.prazo = document.getElementById('md-prazo').value;
   t.valor = document.getElementById('md-valor').value;
+  t.moeda = document.getElementById('md-moeda').value;
   t.cliente = document.getElementById('md-cliente').value;
   t.drive = document.getElementById('md-drive').value;
   t.prog = parseInt(document.getElementById('md-prog').value);
@@ -2329,6 +2354,7 @@ function openNew(colId) {
   document.getElementById('new-brief').value = '';
   document.getElementById('new-cliente').value = '';
   document.getElementById('new-valor').value = '';
+  document.getElementById('new-moeda').value = 'BRL';
   document.getElementById('new-prazo').value = '';
   document.getElementById('new-drive').value = '';
   document.getElementById('new-status').value = colId !== undefined ? colId : 0;
@@ -2356,6 +2382,7 @@ function createTask() {
     urg: urgSel ? urgSel.dataset.u : 'Baixa',
     prazo: document.getElementById('new-prazo').value,
     valor: document.getElementById('new-valor').value,
+    moeda: document.getElementById('new-moeda').value,
     colId,
     cliente: document.getElementById('new-cliente').value,
     drive: document.getElementById('new-drive').value,
@@ -3376,30 +3403,82 @@ loadStickies();
       <span style="font-family:var(--font-display);font-weight:700;font-size:15px;color:var(--text0)">Gerar Invoice</span>
       <button class="modal-close" style="margin-left:auto" onclick="closeInvoice()">✕</button>
     </div>
-    <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px;max-height:70vh;overflow-y:auto">
+
+      <!-- SEÇÃO: Prestador -->
+      <div style="grid-column:1/-1;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);padding-bottom:2px;border-bottom:1px solid var(--line1)">Prestador (você)</div>
       <div>
-        <div class="field-label">Prestador (seu nome/empresa)</div>
+        <div class="field-label">Nome / Empresa</div>
         <input type="text" class="field-input" id="inv-freelancer" placeholder="Seu nome ou empresa...">
       </div>
       <div>
-        <div class="field-label">Documento (CPF/CNPJ)</div>
+        <div class="field-label">CPF / CNPJ</div>
         <input type="text" class="field-input" id="inv-doc" placeholder="000.000.000-00">
       </div>
       <div>
-        <div class="field-label">Cliente</div>
-        <input type="text" class="field-input" id="inv-cliente" placeholder="Nome do cliente...">
+        <div class="field-label">País de origem</div>
+        <select class="field-input" id="inv-pais-origem">
+          <option value="Brasil">Brasil</option>
+          <option value="United States">United States</option>
+          <option value="Portugal">Portugal</option>
+          <option value="Argentina">Argentina</option>
+          <option value="Espanha">Espanha</option>
+          <option value="México">México</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+      <div>
+        <div class="field-label">Endereço de origem</div>
+        <input type="text" class="field-input" id="inv-end-origem" placeholder="Rua, cidade, estado...">
+      </div>
+
+      <!-- SEÇÃO: Cliente -->
+      <div style="grid-column:1/-1;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);padding-bottom:2px;border-bottom:1px solid var(--line1);margin-top:4px">Cliente</div>
+      <div>
+        <div class="field-label">Nome do cliente</div>
+        <input type="text" class="field-input" id="inv-cliente" placeholder="Nome ou empresa do cliente...">
       </div>
       <div>
         <div class="field-label">E-mail do cliente</div>
         <input type="text" class="field-input" id="inv-email" placeholder="cliente@email.com">
       </div>
+      <div>
+        <div class="field-label">País de destino</div>
+        <select class="field-input" id="inv-pais-destino">
+          <option value="Brasil">Brasil</option>
+          <option value="United States">United States</option>
+          <option value="Portugal">Portugal</option>
+          <option value="Argentina">Argentina</option>
+          <option value="Espanha">Espanha</option>
+          <option value="México">México</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+      <div>
+        <div class="field-label">Endereço de destino</div>
+        <input type="text" class="field-input" id="inv-end-destino" placeholder="Rua, cidade, estado...">
+      </div>
+
+      <!-- SEÇÃO: Serviço -->
+      <div style="grid-column:1/-1;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);padding-bottom:2px;border-bottom:1px solid var(--line1);margin-top:4px">Serviço & Pagamento</div>
       <div style="grid-column:1/-1">
         <div class="field-label">Descrição do serviço</div>
         <textarea class="field-input" id="inv-desc" rows="2" placeholder="Criação de conteúdo visual..."></textarea>
       </div>
       <div>
-        <div class="field-label">Valor (R$)</div>
+        <div class="field-label">Valor</div>
         <input type="text" class="field-input" id="inv-valor" placeholder="0,00">
+      </div>
+      <div>
+        <div class="field-label">Moeda</div>
+        <select class="field-input" id="inv-moeda">
+          <option value="BRL">BRL — Real (R$)</option>
+          <option value="USD">USD — Dólar ($)</option>
+          <option value="EUR">EUR — Euro (€)</option>
+          <option value="GBP">GBP — Libra (£)</option>
+          <option value="ARS">ARS — Peso AR ($)</option>
+          <option value="CAD">CAD — Dólar CA ($)</option>
+        </select>
       </div>
       <div>
         <div class="field-label">Vencimento</div>
@@ -3412,16 +3491,29 @@ loadStickies();
           <option value="Transferência bancária">Transferência bancária</option>
           <option value="Boleto">Boleto</option>
           <option value="Cartão de crédito">Cartão de crédito</option>
+          <option value="Wire Transfer">Wire Transfer</option>
+          <option value="PayPal">PayPal</option>
           <option value="Dinheiro">Dinheiro</option>
         </select>
       </div>
       <div>
         <div class="field-label">Chave PIX / Dados bancários</div>
-        <input type="text" class="field-input" id="inv-pix" placeholder="CPF, e-mail ou chave aleatória...">
+        <input type="text" class="field-input" id="inv-pix" placeholder="CPF, e-mail ou chave...">
       </div>
-      <div style="grid-column:1/-1">
+
+      <!-- SEÇÃO: Configurações -->
+      <div style="grid-column:1/-1;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);padding-bottom:2px;border-bottom:1px solid var(--line1);margin-top:4px">Configurações do documento</div>
+      <div>
+        <div class="field-label">Idioma do invoice</div>
+        <select class="field-input" id="inv-lang">
+          <option value="pt">Português</option>
+          <option value="en">English</option>
+          <option value="es">Español</option>
+        </select>
+      </div>
+      <div>
         <div class="field-label">Observações</div>
-        <input type="text" class="field-input" id="inv-obs" placeholder="Agradecimento, prazo de aprovação, etc...">
+        <input type="text" class="field-input" id="inv-obs" placeholder="Agradecimento, condições, etc...">
       </div>
     </div>
     <div class="modal-foot">
