@@ -1623,7 +1623,7 @@ input[type=range] {
   </div>
   <div class="sidebar-section">
     <div class="sidebar-section-label">Clientes</div>
-    <div class="nav-item">
+    <div class="nav-item" id="nav-clientes" onclick="setView('clientes')">
       <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.2" fill="none" opacity=".7"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none" opacity=".5"/></svg>
       Clientes
     </div>
@@ -1752,7 +1752,13 @@ input[type=range] {
       <div class="stat-sub">requer atenção</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">A receber</div>
+      <div class="stat-label" style="display:flex;align-items:center;justify-content:space-between">
+        A receber
+        <button id="st-receber-toggle" onclick="toggleReceberVisibility()" title="Mostrar/ocultar valor" style="background:none;border:none;cursor:pointer;color:var(--text3);padding:0;display:flex;align-items:center;transition:color .15s" onmouseenter="this.style.color='var(--text1)'" onmouseleave="this.style.color='var(--text3)'">
+          <svg id="st-receber-eye" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3"/></svg>
+          <svg id="st-receber-eye-off" width="14" height="14" viewBox="0 0 16 16" fill="none" style="display:none"><path d="M2 2l12 12M6.5 6.6A2 2 0 0 0 9.4 9.5M4.2 4.3C2.7 5.3 1 8 1 8s2.5 5 7 5c1.4 0 2.7-.4 3.8-1M6 3.2C6.6 3.1 7.3 3 8 3c4.5 0 7 5 7 5s-.7 1.4-1.8 2.7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </button>
+      </div>
       <div class="stat-value v-amber" id="st-receber">R$0</div>
       <div class="stat-sub">pendente</div>
     </div>
@@ -1761,6 +1767,7 @@ input[type=range] {
   <div class="kanban-wrap" id="kanban"></div>
   <div class="list-wrap" id="listView" style="display:none"></div>
   <div class="fin-wrap" id="finView" style="display:none"></div>
+  <div class="clientes-wrap" id="clientesView" style="display:none"></div>
 </div>
 
 <!-- TASK DETAIL OVERLAY -->
@@ -1855,7 +1862,11 @@ input[type=range] {
 
         <div class="side-field">
           <div class="side-label">Cliente</div>
-          <input type="text" class="side-input" id="md-cliente" placeholder="Nome do cliente">
+          <div class="cliente-select-wrap" id="md-cliente-wrap">
+            <input type="text" class="side-input" id="md-cliente" placeholder="Buscar ou digitar cliente..." autocomplete="off"
+              oninput="filterClienteDropdown(this.value,'md')" onfocus="openClienteDD('md')" onblur="setTimeout(()=>closeClienteDD('md'),180)">
+            <div class="cliente-dd" id="md-cliente-dd"></div>
+          </div>
         </div>
 
         <div class="side-field">
@@ -1937,7 +1948,11 @@ input[type=range] {
       </div>
       <div>
         <div class="field-label">Cliente</div>
-        <input type="text" class="field-input" id="new-cliente" placeholder="Nome do cliente">
+        <div class="cliente-select-wrap" style="position:relative">
+          <input type="text" class="field-input" id="new-cliente" placeholder="Buscar ou digitar cliente..." autocomplete="off"
+            oninput="filterClienteDropdown(this.value,'new')" onfocus="openClienteDD('new')" onblur="setTimeout(()=>closeClienteDD('new'),180)">
+          <div class="cliente-dd" id="new-cliente-dd"></div>
+        </div>
       </div>
       <div>
         <div class="field-label">Valor</div>
@@ -2021,13 +2036,34 @@ input[type=range] {
 <div class="toast" id="toast"></div>
 
 <script>
-const COLS = [
+const DEFAULT_COLS = [
   { id: 0, name: 'Aguardando início', dot: '#888780' },
   { id: 1, name: 'Prioridade do dia', dot: '#f46a6a' },
   { id: 2, name: 'Fazendo',           dot: '#4a9eff' },
   { id: 3, name: 'Entregue',          dot: '#3ecf8e' },
   { id: 4, name: 'Alteração',         dot: '#f5a623' },
 ];
+const COL_DOTS = ['#888780','#f46a6a','#4a9eff','#3ecf8e','#f5a623','#a594ff','#2dd4bf','#f59e0b','#e879a0','#60a5fa'];
+let COLS = [];
+let nextColId = 5;
+
+function saveCols() {
+  try {
+    localStorage.setItem('creativeflow_cols', JSON.stringify(COLS));
+    localStorage.setItem('creativeflow_nextColId', nextColId);
+  } catch(e) {}
+}
+function loadCols() {
+  try {
+    const s = localStorage.getItem('creativeflow_cols');
+    const sid = localStorage.getItem('creativeflow_nextColId');
+    if (s) { COLS = JSON.parse(s); nextColId = sid ? parseInt(sid) : 10; return; }
+  } catch(e) {}
+  COLS = JSON.parse(JSON.stringify(DEFAULT_COLS));
+  nextColId = 5;
+  saveCols();
+}
+loadCols();
 
 const TYPE_CLASS = {
   'Social media': 'tag-sm',
@@ -2103,8 +2139,9 @@ function renderKanban() {
     colEl.innerHTML = `
       <div class="col-head">
         <div class="col-dot" style="background:${col.dot}"></div>
-        <span class="col-name">${col.name}</span>
+        <span class="col-name" title="Clique duplo para renomear" ondblclick="renameCol(${col.id}, this)">${col.name}</span>
         <span class="col-count">${colTasks.length}</span>
+        <button class="col-del-btn" title="Excluir coluna" onclick="deleteCol(${col.id})">✕</button>
       </div>
       <div class="col-body" id="col-${col.id}"></div>
       <div class="add-card" onclick="openNew(${col.id})">+ Adicionar</div>
@@ -2139,7 +2176,7 @@ function renderKanban() {
         <div class="card-tags">${tagsHtml}</div>
         <div class="card-footer">
           <span class="${dateCls}">${dateStr}</span>
-          <span class="card-value">${t.valor ? 'R$'+t.valor : ''}</span>
+          <span class="card-value">${t.valor ? (t.moeda === 'USD' ? '$' : t.moeda === 'EUR' ? '€' : t.moeda === 'GBP' ? '£' : 'R$')+t.valor : ''}</span>
         </div>
         ${revHtml}
       `;
@@ -2160,6 +2197,18 @@ function renderKanban() {
       body.appendChild(card);
     });
   });
+
+  // Add "Nova coluna" compact pill button at end
+  const addColEl = document.createElement('div');
+  addColEl.className = 'col-add-pill';
+  addColEl.innerHTML = `
+    <button class="col-add-pill-btn" onclick="openNewColModal()" title="Nova coluna">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      Nova coluna
+    </button>
+  `;
+  kb.appendChild(addColEl);
+
   updateStats();
   initKanbanDrop();
 }
@@ -2205,23 +2254,68 @@ function initKanbanDrop() {
   });
 }
 
+let receberHidden = false;
+let receberDisplayText = 'R$0';
+
+function toggleReceberVisibility() {
+  receberHidden = !receberHidden;
+  const el = document.getElementById('st-receber');
+  const eyeOn = document.getElementById('st-receber-eye');
+  const eyeOff = document.getElementById('st-receber-eye-off');
+  if (receberHidden) {
+    el.textContent = '••••••••';
+    if (eyeOn) eyeOn.style.display = 'none';
+    if (eyeOff) eyeOff.style.display = '';
+  } else {
+    el.textContent = receberDisplayText;
+    if (eyeOn) eyeOn.style.display = '';
+    if (eyeOff) eyeOff.style.display = 'none';
+  }
+}
+
 function updateStats() {
   const active = tasks.filter(t => t.colId !== 3).length;
   const delivered = tasks.filter(t => t.colId === 3).length;
   const late = tasks.filter(t => t.prazo && isLate(t.prazo) && t.colId !== 3).length;
-  const receber = tasks
-    .filter(t => !t.paid && t.valor)
-    .reduce((sum, t) => {
-      const v = parseFloat((t.valor || '0').replace(',', '.')) || 0;
-      return sum + v;
-    }, 0);
+
+  // Group unpaid tasks by currency
+  const unpaidTasks = tasks.filter(t => !t.paid && t.valor);
+  const byCurrency = {};
+  unpaidTasks.forEach(t => {
+    const moeda = t.moeda || 'BRL';
+    const v = parseFloat((t.valor || '0').replace(',', '.')) || 0;
+    byCurrency[moeda] = (byCurrency[moeda] || 0) + v;
+  });
+
+  const MOEDA_SYM = { BRL: 'R$', USD: '$', EUR: '€', GBP: '£', ARS: '$', CAD: '$' };
+  const MOEDA_LABEL = { BRL: 'R$', USD: 'US$', EUR: '€', GBP: '£', ARS: 'ARS$', CAD: 'CA$' };
+
+  let receberStr;
+  const entries = Object.entries(byCurrency);
+  if (entries.length === 0) {
+    receberStr = 'R$0';
+  } else if (entries.length === 1) {
+    const [cur, val] = entries[0];
+    const sym = MOEDA_LABEL[cur] || cur;
+    receberStr = sym + val.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  } else {
+    // multiple currencies: show each on a short combined string
+    receberStr = entries.map(([cur, val]) => {
+      const sym = MOEDA_LABEL[cur] || cur;
+      return sym + val.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }).join(' + ');
+  }
+
+  receberDisplayText = receberStr;
 
   document.getElementById('st-ativas').textContent = active;
   document.getElementById('st-entregues').textContent = delivered;
   document.getElementById('st-atrasadas').textContent = late;
 
-  const fmt = receber.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-  document.getElementById('st-receber').textContent = 'R$' + fmt;
+  const recEl = document.getElementById('st-receber');
+  if (!receberHidden) {
+    recEl.textContent = receberStr;
+  }
 
   // Atualiza subtítulo do topbar
   const months = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
@@ -2243,6 +2337,80 @@ function updateStats() {
 
 function filterCards() { renderKanban(); }
 
+// ── COLUMN MANAGEMENT ──
+function openNewColModal() {
+  document.getElementById('newColName').value = '';
+  // reset dot selection
+  document.querySelectorAll('.col-dot-opt').forEach((d,i) => d.classList.toggle('selected', i===0));
+  document.getElementById('newColOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('newColName').focus(), 50);
+}
+function closeNewCol() { document.getElementById('newColOverlay').classList.remove('open'); }
+
+function createCol() {
+  const name = document.getElementById('newColName').value.trim();
+  if (!name) { document.getElementById('newColName').focus(); return; }
+  const selDot = document.querySelector('.col-dot-opt.selected');
+  const dot = selDot ? selDot.dataset.color : COL_DOTS[nextColId % COL_DOTS.length];
+  COLS.push({ id: nextColId, name, dot });
+  nextColId++;
+  saveCols();
+  closeNewCol();
+  renderKanban();
+  // update status selects
+  updateStatusDropdowns();
+  showToast(`Coluna "${name}" criada!`);
+}
+
+function renameCol(id, el) {
+  const col = COLS.find(c => c.id === id);
+  if (!col) return;
+  const inp = document.createElement('input');
+  inp.className = 'col-rename-input';
+  inp.value = col.name;
+  el.replaceWith(inp);
+  inp.focus();
+  inp.select();
+  const commit = () => {
+    const v = inp.value.trim();
+    if (v) { col.name = v; saveCols(); updateStatusDropdowns(); }
+    renderKanban();
+  };
+  inp.addEventListener('blur', commit);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); if (e.key === 'Escape') { inp.value = col.name; inp.blur(); } });
+}
+
+function deleteCol(id) {
+  const col = COLS.find(c => c.id === id);
+  if (!col) return;
+  const count = tasks.filter(t => t.colId === id).length;
+  if (count > 0) {
+    if (!confirm(`A coluna "${col.name}" tem ${count} tarefa(s). Deseja excluí-la e mover as tarefas para "Aguardando início"?`)) return;
+    tasks.forEach(t => { if (t.colId === id) t.colId = 0; });
+    saveTasks();
+  }
+  COLS = COLS.filter(c => c.id !== id);
+  saveCols();
+  renderKanban();
+  updateStatusDropdowns();
+  showToast(`Coluna excluída.`);
+}
+
+function updateStatusDropdowns() {
+  // update status dropdown in task detail modal
+  const dd = document.getElementById('statusDD');
+  if (dd) {
+    dd.innerHTML = COLS.map(c => `<div class="status-opt" onclick="setStatus('${c.name.replace(/'/g,"\\'")}','${c.dot}',${c.id})"><span class="s-dot" style="background:${c.dot}"></span>${c.name}</div>`).join('');
+  }
+  // update new-status select
+  const ns = document.getElementById('new-status');
+  if (ns) {
+    const cur = ns.value;
+    ns.innerHTML = COLS.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    ns.value = cur;
+  }
+}
+
 // ── DETAIL MODAL ──
 function openDetail(id) {
   const t = tasks.find(x => x.id === id);
@@ -2256,7 +2424,9 @@ function openDetail(id) {
   document.getElementById('md-prazo').value = t.prazo;
   document.getElementById('md-valor').value = t.valor;
   document.getElementById('md-moeda').value = t.moeda || 'BRL';
-  document.getElementById('md-cliente').value = t.cliente;
+  const mdCli = document.getElementById('md-cliente');
+  mdCli.value = t.cliente || '';
+  mdCli.dataset.clienteId = t.clienteId || '';
   document.getElementById('md-drive').value = t.drive;
   document.getElementById('md-prog').value = t.prog;
   document.getElementById('md-created').textContent = t.created;
@@ -2317,7 +2487,9 @@ function saveTask() {
   t.prazo = document.getElementById('md-prazo').value;
   t.valor = document.getElementById('md-valor').value;
   t.moeda = document.getElementById('md-moeda').value;
-  t.cliente = document.getElementById('md-cliente').value;
+  const mdCli = document.getElementById('md-cliente');
+  t.cliente = mdCli.value;
+  t.clienteId = mdCli.dataset.clienteId || null;
   t.drive = document.getElementById('md-drive').value;
   t.prog = parseInt(document.getElementById('md-prog').value);
   t.paid = paid;
@@ -2352,7 +2524,9 @@ function deleteTask() {
 function openNew(colId) {
   document.getElementById('new-title').value = '';
   document.getElementById('new-brief').value = '';
-  document.getElementById('new-cliente').value = '';
+  const newCli = document.getElementById('new-cliente');
+  newCli.value = '';
+  newCli.dataset.clienteId = '';
   document.getElementById('new-valor').value = '';
   document.getElementById('new-moeda').value = 'BRL';
   document.getElementById('new-prazo').value = '';
@@ -2385,6 +2559,7 @@ function createTask() {
     moeda: document.getElementById('new-moeda').value,
     colId,
     cliente: document.getElementById('new-cliente').value,
+    clienteId: document.getElementById('new-cliente').dataset.clienteId || null,
     drive: document.getElementById('new-drive').value,
     comments: [],
     tags: [],
@@ -2516,17 +2691,19 @@ function setView(v) {
   document.getElementById('nav-kanban').classList.toggle('active', v === 'kanban');
   document.getElementById('nav-lista').classList.toggle('active', v === 'lista');
   document.getElementById('nav-financeiro').classList.toggle('active', v === 'financeiro');
+  document.getElementById('nav-clientes').classList.toggle('active', v === 'clientes');
 
-  const kanbanEl = document.getElementById('kanban');
-  const listEl   = document.getElementById('listView');
-  const finEl    = document.getElementById('finView');
+  const kanbanEl   = document.getElementById('kanban');
+  const listEl     = document.getElementById('listView');
+  const finEl      = document.getElementById('finView');
+  const clientesEl = document.getElementById('clientesView');
 
-  kanbanEl.style.display = v === 'kanban'     ? 'flex'  : 'none';
-  listEl.style.display   = v === 'lista'      ? 'flex'  : 'none';
-  finEl.style.display    = v === 'financeiro' ? 'flex'  : 'none';
+  kanbanEl.style.display   = v === 'kanban'     ? 'flex'  : 'none';
+  listEl.style.display     = v === 'lista'      ? 'flex'  : 'none';
+  finEl.style.display      = v === 'financeiro' ? 'flex'  : 'none';
+  clientesEl.style.display = v === 'clientes'   ? 'flex'  : 'none';
 
-  // Ensure each scrollable view fills the remaining space
-  [listEl, finEl].forEach(el => {
+  [listEl, finEl, clientesEl].forEach(el => {
     el.style.flexDirection = 'column';
     el.style.flex = '1';
     el.style.minHeight = '0';
@@ -2534,18 +2711,19 @@ function setView(v) {
     el.style.overflowX = 'hidden';
   });
 
-  // stats-row + filters only for kanban/lista
-  const statsRow = document.querySelector('.stats-row');
+  const statsRow    = document.querySelector('.stats-row');
   const topbarRight = document.querySelector('.topbar-right');
-  statsRow.style.display = v === 'financeiro' ? 'none' : '';
-  topbarRight.style.display = v === 'financeiro' ? 'none' : '';
+  const hideStats   = v === 'financeiro' || v === 'clientes';
+  statsRow.style.display    = hideStats ? 'none' : '';
+  topbarRight.style.display = hideStats ? 'none' : '';
 
-  const titles = { kanban: 'Kanban', lista: 'Lista', financeiro: 'Financeiro' };
+  const titles = { kanban: 'Kanban', lista: 'Lista', financeiro: 'Financeiro', clientes: 'Clientes' };
   document.querySelector('.topbar-title').textContent = titles[v] || v;
 
   if (v === 'lista') renderList();
   else if (v === 'kanban') renderKanban();
   else if (v === 'financeiro') renderFinanceiro();
+  else if (v === 'clientes') renderClientes();
 }
 
 function renderList() {
@@ -3583,15 +3761,58 @@ function generateInvoicePDF() {
   const pagamento  = document.getElementById('inv-pagamento').value;
   const pix        = document.getElementById('inv-pix').value.trim();
   const obs        = document.getElementById('inv-obs').value.trim();
+  const paisOrigem = (document.getElementById('inv-pais-origem')||{value:''}).value || '';
+  const endOrigem  = (document.getElementById('inv-end-origem')||{value:''}).value || '';
+  const paisDest   = (document.getElementById('inv-pais-destino')||{value:''}).value || '';
+  const endDest    = (document.getElementById('inv-end-destino')||{value:''}).value || '';
+  const moeda      = (document.getElementById('inv-moeda')||{value:'BRL'}).value || 'BRL';
+  const lang       = (document.getElementById('inv-lang')||{value:'pt'}).value || 'pt';
+  const moedaSym   = { BRL:'R$', USD:'$', EUR:'€', GBP:'£', ARS:'$', CAD:'$' }[moeda] || 'R$';
+
+  const isMulti = window._invoiceIsMulti && window._invoiceClienteTasks && window._invoiceClienteTasks.length > 0;
+  const ctasks  = isMulti ? window._invoiceClienteTasks : null;
+  window._invoiceIsMulti = false;
+  window._invoiceClienteTasks = null;
 
   const invoiceNum = 'INV-' + String(Date.now()).slice(-6);
-  const today = new Date().toLocaleDateString('pt-BR', {day:'2-digit',month:'long',year:'numeric'});
+  const locales = { pt: 'pt-BR', en: 'en-US', es: 'es-AR' };
+  const today = new Date().toLocaleDateString(locales[lang] || 'pt-BR', {day:'2-digit',month:'long',year:'numeric'});
+
+  const LABELS = {
+    pt: { inv:'INVOICE', from:'De (Prestador)', to:'Para (Cliente)', issued:'Emissão', due:'Vencimento', status:'Status', pending:'Aguardando pagamento',
+          desc:'Descrição', qty:'Qtd', unit:'Valor unit.', total:'Total', subtotal:'Subtotal', discounts:'Descontos',
+          payment:'Pagamento', method:'Forma', key:'Chave / Dados', dueOn:'Vence em', obs_:'Observações', sign:'Assinatura do prestador',
+          thanks:'Agradecemos pela confiança. Em caso de dúvidas, entre em contato.' },
+    en: { inv:'INVOICE', from:'From (Provider)', to:'To (Client)', issued:'Issue Date', due:'Due Date', status:'Status', pending:'Awaiting Payment',
+          desc:'Description', qty:'Qty', unit:'Unit Price', total:'Total', subtotal:'Subtotal', discounts:'Discounts',
+          payment:'Payment', method:'Method', key:'Payment Key / Details', dueOn:'Due on', obs_:'Notes', sign:'Provider Signature',
+          thanks:'Thank you for your trust. For any questions, please reach out.' },
+    es: { inv:'FACTURA', from:'De (Proveedor)', to:'Para (Cliente)', issued:'Fecha de emisión', due:'Vencimiento', status:'Estado', pending:'Pago pendiente',
+          desc:'Descripción', qty:'Cant.', unit:'Precio unit.', total:'Total', subtotal:'Subtotal', discounts:'Descuentos',
+          payment:'Pago', method:'Método', key:'Clave / Datos', dueOn:'Vence el', obs_:'Observaciones', sign:'Firma del proveedor',
+          thanks:'Gracias por su confianza. Ante cualquier consulta, no dude en contactarnos.' },
+  };
+  const L = LABELS[lang] || LABELS.pt;
+
+  let tableRows = '';
+  let grandTotal = 0;
+  if (isMulti && ctasks) {
+    ctasks.forEach(t => {
+      const v = parseFloat((t.valor||'0').replace(',','.')) || 0;
+      grandTotal += v;
+      tableRows += `<div class="table-row"><div class="row-desc">${t.title}${t.brief?`<div style="font-size:11px;color:#888;margin-top:2px">${t.brief.slice(0,80)}${t.brief.length>80?'…':''}</div>`:''}</div><div class="row-qty">1</div><div class="row-unit">${moedaSym}${fmtMoney(t.valor||'0')}</div><div class="row-tot">${moedaSym}${fmtMoney(t.valor||'0')}</div></div>`;
+    });
+  } else {
+    grandTotal = parseFloat((valor||'0').replace(',','.')) || 0;
+    tableRows = `<div class="table-row"><div class="row-desc">${desc}</div><div class="row-qty">1</div><div class="row-unit">${moedaSym}${fmtMoney(valor)}</div><div class="row-tot">${moedaSym}${fmtMoney(valor)}</div></div>`;
+  }
+  const totalFmt = grandTotal.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 
   const htmlContent = `<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="${lang}">
 <head>
 <meta charset="UTF-8">
-<title>Invoice ${invoiceNum}</title>
+<title>${L.inv} ${invoiceNum}</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
@@ -3615,12 +3836,10 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1a1a2e;font-size:13px
 .party-detail{font-size:12px;color:#666;line-height:1.6}
 .table-wrap{margin-bottom:24px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden}
 .table-head{display:flex;background:#1a1a2e;color:#fff;padding:10px 16px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px}
-.col-desc{flex:1}
-.col-qty{width:60px;text-align:center}
-.col-unit{width:110px;text-align:right}
-.col-tot{width:110px;text-align:right}
-.table-row{display:flex;padding:14px 16px;align-items:center}
+.col-desc{flex:1}.col-qty{width:60px;text-align:center}.col-unit{width:110px;text-align:right}.col-tot{width:110px;text-align:right}
+.table-row{display:flex;padding:14px 16px;align-items:flex-start;border-top:1px solid #f0f0f0}
 .row-desc{flex:1;font-size:13px;color:#1a1a2e;line-height:1.5}
+.row-qty,.row-unit,.row-tot{padding-top:1px}
 .row-qty{width:60px;text-align:center;font-size:13px;color:#444}
 .row-unit{width:110px;text-align:right;font-size:13px;color:#444}
 .row-tot{width:110px;text-align:right;font-size:13px;font-weight:600;color:#1a1a2e}
@@ -3640,81 +3859,69 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1a1a2e;font-size:13px
 .stamp-label{font-size:10px;color:#bbb;margin-bottom:28px;text-align:right}
 .stamp-line{border-top:1px solid #ccc;padding-top:5px;font-size:11px;color:#888;text-align:center;min-width:160px}
 @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.page{padding:30px 28px}}
-</style>
-</head>
+</style></head>
 <body>
 <div class="page">
   <div class="header">
     <div>
       <div class="brand-name">${freelancer}</div>
-      ${doc ? `<div class="brand-sub">CPF/CNPJ: ${doc}</div>` : ''}
+      ${doc?`<div class="brand-sub">${doc}</div>`:''}
+      ${endOrigem?`<div class="brand-sub">${endOrigem}${paisOrigem?', '+paisOrigem:''}</div>`:paisOrigem?`<div class="brand-sub">${paisOrigem}</div>`:''}
     </div>
     <div class="invoice-badge">
-      <div class="invoice-word">INVOICE</div>
+      <div class="invoice-word">${L.inv}</div>
       <div class="invoice-num">#${invoiceNum}</div>
     </div>
   </div>
   <div class="divider"></div>
   <div class="meta-row">
-    <div class="meta-card"><div class="meta-label">Emissão</div><div class="meta-value">${today}</div></div>
-    <div class="meta-card"><div class="meta-label">Vencimento</div><div class="meta-value">${fmtDateInv(venc)}</div></div>
-    <div class="meta-card"><div class="meta-label">Status</div><div class="meta-value" style="color:#f59e0b">Aguardando pagamento</div></div>
+    <div class="meta-card"><div class="meta-label">${L.issued}</div><div class="meta-value">${today}</div></div>
+    <div class="meta-card"><div class="meta-label">${L.due}</div><div class="meta-value">${fmtDateInv(venc)}</div></div>
+    <div class="meta-card"><div class="meta-label">${L.status}</div><div class="meta-value" style="color:#f59e0b">${L.pending}</div></div>
   </div>
   <div class="parties">
     <div class="party">
-      <div class="party-label">De (Prestador)</div>
+      <div class="party-label">${L.from}</div>
       <div class="party-name">${freelancer}</div>
-      ${doc ? `<div class="party-detail">${doc}</div>` : ''}
+      ${doc?`<div class="party-detail">${doc}</div>`:''}
+      ${endOrigem?`<div class="party-detail">${endOrigem}${paisOrigem?', '+paisOrigem:''}</div>`:''}
     </div>
     <div class="party">
-      <div class="party-label">Para (Cliente)</div>
+      <div class="party-label">${L.to}</div>
       <div class="party-name">${cliente}</div>
-      ${email ? `<div class="party-detail">${email}</div>` : ''}
+      ${email?`<div class="party-detail">${email}</div>`:''}
+      ${endDest?`<div class="party-detail">${endDest}${paisDest?', '+paisDest:''}</div>`:''}
     </div>
   </div>
   <div class="table-wrap">
     <div class="table-head">
-      <span class="col-desc">Descrição</span>
-      <span class="col-qty">Qtd</span>
-      <span class="col-unit">Valor unit.</span>
-      <span class="col-tot">Total</span>
+      <span class="col-desc">${L.desc}</span>
+      <span class="col-qty">${L.qty}</span>
+      <span class="col-unit">${L.unit}</span>
+      <span class="col-tot">${L.total}</span>
     </div>
-    <div class="table-row">
-      <div class="row-desc">${desc}</div>
-      <div class="row-qty">1</div>
-      <div class="row-unit">R$ ${fmtMoney(valor)}</div>
-      <div class="row-tot">R$ ${fmtMoney(valor)}</div>
-    </div>
+    ${tableRows}
   </div>
-  <div class="totals">
-    <div class="totals-box">
-      <div class="total-row"><span>Subtotal</span><span>R$ ${fmtMoney(valor)}</span></div>
-      <div class="total-row"><span>Descontos</span><span>—</span></div>
-      <div class="total-final">
-        <span class="total-final-label">Total</span>
-        <span class="total-final-value">R$ ${fmtMoney(valor)}</span>
-      </div>
-    </div>
-  </div>
+  <div class="totals"><div class="totals-box">
+    <div class="total-row"><span>${L.subtotal}</span><span>${moedaSym}${totalFmt}</span></div>
+    <div class="total-row"><span>${L.discounts}</span><span>—</span></div>
+    <div class="total-final"><span class="total-final-label">${L.total}</span><span class="total-final-value">${moedaSym}${totalFmt}</span></div>
+  </div></div>
   <div class="pay-section">
-    <div class="pay-title">Pagamento</div>
+    <div class="pay-title">${L.payment}</div>
     <div class="pay-grid">
-      <div><div class="pay-item-label">Forma</div><div class="pay-item-value">${pagamento}</div></div>
-      ${pix ? `<div><div class="pay-item-label">Chave PIX / Dados</div><div class="pay-item-value">${pix}</div></div>` : ''}
-      <div><div class="pay-item-label">Vence em</div><div class="pay-item-value">${fmtDateInv(venc)}</div></div>
+      <div><div class="pay-item-label">${L.method}</div><div class="pay-item-value">${pagamento}</div></div>
+      ${pix?`<div><div class="pay-item-label">${L.key}</div><div class="pay-item-value">${pix}</div></div>`:''}
+      <div><div class="pay-item-label">${L.dueOn}</div><div class="pay-item-value">${fmtDateInv(venc)}</div></div>
     </div>
   </div>
   <div class="footer">
-    <div class="footer-obs">${obs ? `<strong>Obs:</strong> ${obs}` : 'Agradecemos pela confiança. Em caso de dúvidas, entre em contato.'}</div>
-    <div>
-      <div class="stamp-label">Assinatura do prestador</div>
-      <div class="stamp-line">${freelancer}</div>
-    </div>
+    <div class="footer-obs">${obs?`<strong>${L.obs_}:</strong> ${obs}`:L.thanks}</div>
+    <div><div class="stamp-label">${L.sign}</div><div class="stamp-line">${freelancer}</div></div>
   </div>
 </div>
 <script>window.onload=()=>window.print();<\/script>
-</body>
-</html>`;
+</body></html>`;
 
   const win = window.open('', '_blank');
   if (!win) { showToast('Permita pop-ups para gerar o PDF'); return; }
@@ -3723,6 +3930,576 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1a1a2e;font-size:13px
   closeInvoice();
   showToast('Invoice gerado! Use "Salvar como PDF" na impressão.');
 }
+</script>
+
+<style>
+/* ── COL MANAGEMENT ── */
+.col-del-btn {
+  display: none;
+  background: none; border: none; cursor: pointer;
+  color: var(--text3); font-size: 11px; padding: 2px 4px;
+  border-radius: 4px; line-height: 1; margin-left: auto;
+  transition: color .15s, background .15s;
+}
+.col:hover .col-del-btn { display: flex; align-items: center; }
+.col-del-btn:hover { color: var(--red); background: var(--red-dim); }
+.col-rename-input {
+  background: var(--bg4); border: 1px solid var(--accent); border-radius: 4px;
+  color: var(--text0); font-size: 12px; font-weight: 600; font-family: var(--font-body);
+  padding: 2px 6px; width: 100%; outline: none;
+}
+.col-add-pill {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 2px;
+  flex-shrink: 0;
+}
+.col-add-pill-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  background: var(--bg2);
+  border: 1px solid var(--line2);
+  border-radius: var(--r-md);
+  color: var(--text3);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font-body);
+  white-space: nowrap;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.col-add-pill-btn:hover {
+  background: var(--accent-dim2);
+  border-color: var(--accent);
+  color: var(--accent2);
+}
+.col-add-pill-btn:active { transform: scale(.97); }
+
+/* ── CLIENTES VIEW ── */
+.clientes-wrap {
+  padding: 24px 28px; gap: 20px;
+}
+.clientes-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.clientes-header h2 { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--text0); }
+.clientes-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px; align-content: start;
+}
+.cliente-card {
+  background: var(--bg2); border: 1px solid var(--line); border-radius: var(--r-lg);
+  padding: 18px; cursor: pointer; transition: border-color .15s, background .15s;
+  position: relative;
+}
+.cliente-card:hover { border-color: var(--line2); background: var(--bg3); }
+.cliente-card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.cliente-avatar {
+  width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0;
+  background: var(--accent-dim); color: var(--accent2);
+}
+.cliente-name { font-size: 14px; font-weight: 700; color: var(--text0); }
+.cliente-email { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.cliente-stats { display: flex; gap: 12px; margin-bottom: 14px; }
+.cliente-stat { flex: 1; background: var(--bg3); border-radius: var(--r-sm); padding: 8px 10px; }
+.cliente-stat-label { font-size: 9px; text-transform: uppercase; letter-spacing: .5px; color: var(--text3); margin-bottom: 3px; }
+.cliente-stat-value { font-size: 14px; font-weight: 700; color: var(--text0); }
+.cliente-actions { display: flex; gap: 7px; }
+.btn-cliente-inv {
+  flex: 1; background: var(--teal-dim); border: 1px solid var(--teal); color: var(--teal);
+  border-radius: var(--r-sm); padding: 6px 10px; font-size: 11px; font-weight: 600;
+  cursor: pointer; font-family: var(--font-body); display: flex; align-items: center; justify-content: center; gap: 5px;
+  transition: background .15s;
+}
+.btn-cliente-inv:hover { background: rgba(45,212,191,.25); }
+.btn-cliente-edit {
+  background: var(--bg4); border: 1px solid var(--line2); color: var(--text2);
+  border-radius: var(--r-sm); padding: 6px 10px; font-size: 11px;
+  cursor: pointer; font-family: var(--font-body);
+  transition: border-color .15s, color .15s;
+}
+.btn-cliente-edit:hover { border-color: var(--accent); color: var(--accent2); }
+.cliente-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+.cliente-task-tag {
+  font-size: 10px; padding: 2px 7px; border-radius: 99px;
+  background: var(--bg4); color: var(--text2); border: 1px solid var(--line);
+}
+.cliente-task-tag.ativa { background: var(--blue-dim); color: var(--blue); border-color: transparent; }
+.cliente-task-tag.atrasada { background: var(--red-dim); color: var(--red); border-color: transparent; }
+.cliente-empty {
+  grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--text3);
+}
+.cliente-empty svg { opacity: .3; margin-bottom: 12px; }
+.cliente-empty p { font-size: 13px; }
+
+/* ── CLIENTE SEARCHABLE DROPDOWN ── */
+.cliente-select-wrap { position: relative; }
+.cliente-dd {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  border-radius: var(--r-md);
+  z-index: 9999;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 8px 24px rgba(0,0,0,.4);
+}
+.cliente-dd.open { display: block; }
+.cliente-dd-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 12px; cursor: pointer; font-size: 12px;
+  color: var(--text1); transition: background .1s;
+}
+.cliente-dd-item:hover, .cliente-dd-item.active { background: var(--bg4); color: var(--text0); }
+.cliente-dd-av {
+  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+  background: var(--accent-dim); color: var(--accent2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700;
+}
+.cliente-dd-meta { display: flex; flex-direction: column; gap: 1px; }
+.cliente-dd-name { font-size: 12px; font-weight: 600; color: var(--text0); }
+.cliente-dd-sub { font-size: 10px; color: var(--text3); }
+.cliente-dd-new {
+  padding: 8px 12px; cursor: pointer; font-size: 11px; color: var(--teal);
+  border-top: 1px solid var(--line); display: flex; align-items: center; gap: 6px;
+  transition: background .1s;
+}
+.cliente-dd-new:hover { background: var(--teal-dim); }
+.cliente-linked-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; color: var(--teal); background: var(--teal-dim);
+  border-radius: 99px; padding: 2px 7px; margin-top: 4px;
+  border: 1px solid rgba(45,212,191,.2);
+}
+.col-dot-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;
+}
+.col-dot-opt {
+  width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+  border: 2px solid transparent; transition: transform .12s, border-color .12s;
+}
+.col-dot-opt:hover { transform: scale(1.2); }
+.col-dot-opt.selected { border-color: white; transform: scale(1.15); }
+</style>
+
+<!-- NEW COLUMN MODAL -->
+<div class="overlay" id="newColOverlay" onclick="if(event.target===this)closeNewCol()">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-head" style="align-items:center">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;color:var(--accent2)"><rect x="1" y="1" width="4" height="14" rx="1.5" fill="currentColor" opacity=".5"/><rect x="6.5" y="1" width="4" height="9" rx="1.5" fill="currentColor"/><rect x="12" y="1" width="3" height="11" rx="1.5" fill="currentColor" opacity=".5"/></svg>
+      <span style="font-family:var(--font-display);font-weight:700;font-size:15px;color:var(--text0);line-height:1">Nova coluna</span>
+      <button class="modal-close" style="margin-left:auto;flex-shrink:0" onclick="closeNewCol()">✕</button>
+    </div>
+    <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+      <div>
+        <div class="field-label">Nome da coluna</div>
+        <input type="text" class="field-input" id="newColName" placeholder="Ex: Em revisão, Aprovado..." onkeydown="if(event.key==='Enter')createCol()">
+      </div>
+      <div>
+        <div class="field-label">Cor do indicador</div>
+        <div class="col-dot-grid" id="colDotGrid"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="closeNewCol()">Cancelar</button>
+      <div class="foot-right">
+        <button class="btn-primary" onclick="createCol()">Criar coluna</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CLIENTE FORM MODAL -->
+<div class="overlay" id="clienteFormOverlay" onclick="if(event.target===this)closeClienteForm()">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-head">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg>
+      <span id="clienteFormTitle" style="font-family:var(--font-display);font-weight:700;font-size:15px;color:var(--text0)">Novo cliente</span>
+      <button class="modal-close" style="margin-left:auto" onclick="closeClienteForm()">✕</button>
+    </div>
+    <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div style="grid-column:1/-1">
+        <div class="field-label">Nome / Empresa *</div>
+        <input type="text" class="field-input" id="cf-nome" placeholder="Nome do cliente ou empresa...">
+      </div>
+      <div>
+        <div class="field-label">E-mail</div>
+        <input type="text" class="field-input" id="cf-email" placeholder="cliente@email.com">
+      </div>
+      <div>
+        <div class="field-label">Telefone / WhatsApp</div>
+        <input type="text" class="field-input" id="cf-tel" placeholder="+55 11 99999-9999">
+      </div>
+      <div>
+        <div class="field-label">País</div>
+        <select class="field-input" id="cf-pais">
+          <option value="Brasil">Brasil</option>
+          <option value="United States">United States</option>
+          <option value="Portugal">Portugal</option>
+          <option value="Argentina">Argentina</option>
+          <option value="Espanha">Espanha</option>
+          <option value="México">México</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+      <div>
+        <div class="field-label">Moeda padrão</div>
+        <select class="field-input" id="cf-moeda">
+          <option value="BRL">BRL — Real (R$)</option>
+          <option value="USD">USD — Dólar ($)</option>
+          <option value="EUR">EUR — Euro (€)</option>
+          <option value="GBP">GBP — Libra (£)</option>
+          <option value="ARS">ARS — Peso AR ($)</option>
+          <option value="CAD">CAD — Dólar CA ($)</option>
+        </select>
+      </div>
+      <div style="grid-column:1/-1">
+        <div class="field-label">Endereço</div>
+        <input type="text" class="field-input" id="cf-end" placeholder="Rua, cidade, estado...">
+      </div>
+      <div style="grid-column:1/-1">
+        <div class="field-label">Observações</div>
+        <textarea class="field-input" id="cf-obs" rows="2" placeholder="Notas sobre o cliente..."></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-del" id="cf-del-btn" onclick="deleteCliente()" style="display:none">Excluir</button>
+      <div class="foot-right">
+        <button class="btn-ghost" onclick="closeClienteForm()">Cancelar</button>
+        <button class="btn-primary" onclick="saveCliente()">Salvar cliente</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   CLIENTES ENGINE
+══════════════════════════════════════ */
+const CLIENTES_KEY = 'creativeflow_clientes';
+let clientes = [];
+let editingClienteId = null;
+
+function saveClientes() {
+  try { localStorage.setItem(CLIENTES_KEY, JSON.stringify(clientes)); } catch(e) {}
+}
+function loadClientes() {
+  try {
+    const s = localStorage.getItem(CLIENTES_KEY);
+    if (s) { clientes = JSON.parse(s); return; }
+  } catch(e) {}
+  clientes = [];
+}
+loadClientes();
+
+function getClienteInitials(name) {
+  return name.split(' ').slice(0,2).map(w => w[0]||'').join('').toUpperCase() || '?';
+}
+
+function getClienteTasks(clienteIdOrNome) {
+  // First try by ID
+  const byId = tasks.filter(t => t.clienteId && t.clienteId === clienteIdOrNome);
+  if (byId.length > 0) return byId;
+  // Fallback: match by name (case-insensitive)
+  return tasks.filter(t => (t.cliente||'').trim().toLowerCase() === clienteIdOrNome.trim().toLowerCase());
+}
+
+function renderClientes() {
+  const wrap = document.getElementById('clientesView');
+  wrap.innerHTML = '';
+
+  // Merge: clientes cadastrados + clientes apenas em tarefas
+  const cadastradosNomes = new Set(clientes.map(c => c.nome.trim().toLowerCase()));
+  const taskClientes = [...new Set(tasks.map(t => (t.cliente||'').trim()).filter(Boolean))];
+  const extraClientes = taskClientes.filter(n => !cadastradosNomes.has(n.toLowerCase()));
+
+  const header = document.createElement('div');
+  header.className = 'clientes-header';
+  header.innerHTML = `
+    <h2>Clientes <span style="font-size:13px;font-weight:400;color:var(--text3);margin-left:8px">${clientes.length + extraClientes.length} no total</span></h2>
+    <button class="btn-primary" onclick="openClienteForm()">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
+      Novo cliente
+    </button>
+  `;
+  wrap.appendChild(header);
+
+  const grid = document.createElement('div');
+  grid.className = 'clientes-grid';
+
+  const allClientes = [
+    ...clientes.map(c => ({ ...c, cadastrado: true })),
+    ...extraClientes.map(nome => ({ id: null, nome, email: '', tel: '', pais: '', moeda: 'BRL', end: '', obs: '', cadastrado: false }))
+  ];
+
+  if (allClientes.length === 0) {
+    grid.innerHTML = `
+      <div class="cliente-empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <p>Nenhum cliente ainda.<br>Crie tarefas com cliente ou cadastre manualmente.</p>
+      </div>`;
+    wrap.appendChild(grid);
+    return;
+  }
+
+  allClientes.forEach(c => {
+    const lookupKey = c.cadastrado ? c.id : c.nome;
+    const ctasks = getClienteTasks(lookupKey);
+    const ativas = ctasks.filter(t => t.colId !== 3).length;
+    const entregues = ctasks.filter(t => t.colId === 3).length;
+    const atrasadas = ctasks.filter(t => t.prazo && isLate(t.prazo) && t.colId !== 3).length;
+    const total = ctasks.reduce((s, t) => {
+      const v = parseFloat((t.valor||'0').replace(',','.')) || 0;
+      return s + v;
+    }, 0);
+    const moedaSym = { BRL:'R$', USD:'$', EUR:'€', GBP:'£', ARS:'$', CAD:'$' }[c.moeda||'BRL'] || 'R$';
+
+    const card = document.createElement('div');
+    card.className = 'cliente-card';
+    card.innerHTML = `
+      <div class="cliente-card-top">
+        <div class="cliente-avatar">${getClienteInitials(c.nome)}</div>
+        <div>
+          <div class="cliente-name">${c.nome}</div>
+          <div class="cliente-email">${c.email || (c.cadastrado ? '' : '<span style="color:var(--amber);font-size:10px">Sem cadastro completo</span>')}</div>
+        </div>
+      </div>
+      <div class="cliente-stats">
+        <div class="cliente-stat"><div class="cliente-stat-label">Ativas</div><div class="cliente-stat-value" style="color:var(--blue)">${ativas}</div></div>
+        <div class="cliente-stat"><div class="cliente-stat-label">Entregues</div><div class="cliente-stat-value" style="color:var(--green)">${entregues}</div></div>
+        <div class="cliente-stat"><div class="cliente-stat-label">Total</div><div class="cliente-stat-value" style="color:var(--amber)">${moedaSym}${total.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})}</div></div>
+      </div>
+      ${ctasks.length > 0 ? `<div class="cliente-tags">${ctasks.slice(0,4).map(t=>`<span class="cliente-task-tag${t.colId===3?' entregue':isLate(t.prazo)&&t.colId!==3?' atrasada':' ativa'}">${t.title.length>22?t.title.slice(0,22)+'…':t.title}</span>`).join('')}${ctasks.length>4?`<span class="cliente-task-tag">+${ctasks.length-4}</span>`:''}</div>` : ''}
+      <div class="cliente-actions">
+        <button class="btn-cliente-inv" onclick="openClienteInvoice('${c.id || c.nome.replace(/'/g,"\\'")}')">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="2" y="1" width="10" height="13" rx="1.5" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M5 5h6M5 7.5h6M5 10h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          Invoice
+        </button>
+        <button class="btn-cliente-edit" onclick="openClienteForm('${c.id||''}','${c.nome.replace(/'/g,"\\'")}')">Editar</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  wrap.appendChild(grid);
+}
+
+// ── CLIENTE FORM ──
+function openClienteForm(id, nome) {
+  editingClienteId = id || null;
+  const isEdit = !!id;
+  const c = isEdit ? clientes.find(x => x.id === id) : null;
+
+  document.getElementById('clienteFormTitle').textContent = isEdit ? 'Editar cliente' : 'Novo cliente';
+  document.getElementById('cf-del-btn').style.display = isEdit ? '' : 'none';
+  document.getElementById('cf-nome').value = c ? c.nome : (nome || '');
+  document.getElementById('cf-email').value = c ? c.email : '';
+  document.getElementById('cf-tel').value = c ? c.tel : '';
+  document.getElementById('cf-pais').value = c ? (c.pais || 'Brasil') : 'Brasil';
+  document.getElementById('cf-moeda').value = c ? (c.moeda || 'BRL') : 'BRL';
+  document.getElementById('cf-end').value = c ? c.end : '';
+  document.getElementById('cf-obs').value = c ? c.obs : '';
+  document.getElementById('clienteFormOverlay').classList.add('open');
+}
+function closeClienteForm() { document.getElementById('clienteFormOverlay').classList.remove('open'); }
+
+function deleteCliente() {
+  if (!editingClienteId || !confirm('Excluir este cliente?')) return;
+  clientes = clientes.filter(x => x.id !== editingClienteId);
+  saveClientes();
+  closeClienteForm();
+  renderClientes();
+  showToast('Cliente excluído.');
+}
+
+// ── INVOICE POR CLIENTE (todas as demandas) ──
+function openClienteInvoice(clienteId) {
+  const c = clientes.find(x => x.id === clienteId);
+  const nomeCliente = c ? c.nome : clienteId;
+  const ctasks = getClienteTasks(clienteId);
+  if (ctasks.length === 0) { showToast('Este cliente não tem demandas.'); return; }
+
+  // Pre-fill invoice modal
+  try {
+    const p = JSON.parse(localStorage.getItem('creativeflow_profile') || '{}');
+    if (p.name && p.name !== 'Você') document.getElementById('inv-freelancer').value = p.name;
+  } catch(e) {}
+  document.getElementById('inv-cliente').value = nomeCliente;
+  document.getElementById('inv-email').value = c ? (c.email||'') : '';
+  document.getElementById('inv-pais-destino').value = c ? (c.pais||'Brasil') : 'Brasil';
+  document.getElementById('inv-end-destino').value = c ? (c.end||'') : '';
+  document.getElementById('inv-moeda').value = c ? (c.moeda||'BRL') : 'BRL';
+
+  const total = ctasks.reduce((s,t) => s + (parseFloat((t.valor||'0').replace(',','.')) || 0), 0);
+  document.getElementById('inv-valor').value = total.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('inv-desc').value = ctasks.map(t => `• ${t.title}`).join('\n');
+
+  const d = new Date(); d.setDate(d.getDate()+7);
+  document.getElementById('inv-venc').value = d.toISOString().split('T')[0];
+
+  // Store tasks for multi-line PDF
+  window._invoiceClienteTasks = ctasks;
+  window._invoiceIsMulti = true;
+  document.getElementById('invoiceOverlay').classList.add('open');
+}
+
+/* ══════════════════════════════════════
+   CLIENTE SEARCHABLE DROPDOWN
+══════════════════════════════════════ */
+function openClienteDD(prefix) {
+  filterClienteDropdown(document.getElementById(prefix+'-cliente').value, prefix);
+}
+
+function closeClienteDD(prefix) {
+  const dd = document.getElementById(prefix+'-cliente-dd');
+  if (dd) dd.classList.remove('open');
+}
+
+function filterClienteDropdown(q, prefix) {
+  const dd = document.getElementById(prefix+'-cliente-dd');
+  if (!dd) return;
+  dd.innerHTML = '';
+  const query = (q||'').toLowerCase().trim();
+  const matches = clientes.filter(c =>
+    c.nome.toLowerCase().includes(query) ||
+    (c.email||'').toLowerCase().includes(query)
+  );
+
+  matches.forEach(c => {
+    const item = document.createElement('div');
+    item.className = 'cliente-dd-item';
+    const taskCount = getClienteTasks(c.id).length;
+    item.innerHTML = `
+      <div class="cliente-dd-av">${getClienteInitials(c.nome)}</div>
+      <div class="cliente-dd-meta">
+        <div class="cliente-dd-name">${c.nome}</div>
+        <div class="cliente-dd-sub">${c.email || (c.pais||'')}${taskCount ? ` · ${taskCount} demanda${taskCount>1?'s':''}` : ''}</div>
+      </div>
+    `;
+    item.onmousedown = () => selectCliente(prefix, c);
+    dd.appendChild(item);
+  });
+
+  // "Criar cliente" option only if no exact match
+  const exactMatch = clientes.find(c => c.nome.toLowerCase() === query);
+  if (!exactMatch) {
+    const newItem = document.createElement('div');
+    newItem.className = 'cliente-dd-new';
+    newItem.innerHTML = `<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>${query ? `Criar "${q}" como cliente` : 'Criar novo cliente'}`;
+    newItem.onmousedown = () => {
+      closeClienteDD(prefix);
+      openClienteForm('', q);
+      // After saving, the dropdown will auto-link
+      window._pendingClientePrefix = prefix;
+    };
+    dd.appendChild(newItem);
+  }
+
+  dd.classList.toggle('open', dd.children.length > 0);
+}
+
+function selectCliente(prefix, c) {
+  const inp = document.getElementById(prefix+'-cliente');
+  inp.value = c.nome;
+  inp.dataset.clienteId = c.id;
+  closeClienteDD(prefix);
+
+  // Show linked badge
+  const wrap = inp.closest('.cliente-select-wrap') || inp.parentElement;
+  let badge = wrap.querySelector('.cliente-linked-badge');
+  if (!badge) {
+    badge = document.createElement('div');
+    badge.className = 'cliente-linked-badge';
+    wrap.appendChild(badge);
+  }
+  const taskCount = getClienteTasks(c.id).length;
+  badge.innerHTML = `<svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> ${c.nome} vinculado · ${taskCount} demanda${taskCount!==1?'s':''}`;
+}
+
+// After saving a new client from within the task modal, auto-select it
+const _origSaveCliente = typeof saveCliente === 'function' ? saveCliente : null;
+function saveCliente() {
+  const nome = document.getElementById('cf-nome').value.trim();
+  if (!nome) { document.getElementById('cf-nome').focus(); return; }
+  const data = {
+    nome, email: document.getElementById('cf-email').value.trim(),
+    tel: document.getElementById('cf-tel').value.trim(),
+    pais: document.getElementById('cf-pais').value,
+    moeda: document.getElementById('cf-moeda').value,
+    end: document.getElementById('cf-end').value.trim(),
+    obs: document.getElementById('cf-obs').value.trim(),
+  };
+  let newId;
+  if (editingClienteId) {
+    const idx = clientes.findIndex(x => x.id === editingClienteId);
+    if (idx >= 0) {
+      clientes[idx] = { ...clientes[idx], ...data };
+      newId = editingClienteId;
+      tasks.forEach(t => { if (t.clienteId === editingClienteId) t.cliente = data.nome; });
+      saveTasks();
+    }
+  } else {
+    newId = 'cli-' + Date.now();
+    clientes.push({ id: newId, ...data });
+    tasks.forEach(t => {
+      if (!t.clienteId && (t.cliente||'').trim().toLowerCase() === data.nome.trim().toLowerCase()) {
+        t.clienteId = newId;
+      }
+    });
+    saveTasks();
+  }
+  saveClientes();
+  closeClienteForm();
+  if (currentView === 'clientes') renderClientes();
+
+  // Auto-link to pending task modal if opened from there
+  const prefix = window._pendingClientePrefix;
+  if (prefix && newId) {
+    const c = clientes.find(x => x.id === newId);
+    if (c) selectCliente(prefix, c);
+    window._pendingClientePrefix = null;
+  }
+  showToast(editingClienteId ? 'Cliente atualizado!' : 'Cliente cadastrado!');
+}
+
+// Also show linked badge when opening existing task with clienteId
+function showClienteBadgeIfLinked(prefix) {
+  const inp = document.getElementById(prefix+'-cliente');
+  if (!inp) return;
+  const cid = inp.dataset.clienteId;
+  if (!cid) return;
+  const c = clientes.find(x => x.id === cid);
+  if (c) selectCliente(prefix, c);
+}
+
+// ── INIT ──
+function initColDotGrid() {
+  const grid = document.getElementById('colDotGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  COL_DOTS.forEach((color, i) => {
+    const d = document.createElement('div');
+    d.className = 'col-dot-opt' + (i === 0 ? ' selected' : '');
+    d.dataset.color = color;
+    d.style.background = color;
+    d.onclick = () => {
+      document.querySelectorAll('.col-dot-opt').forEach(x => x.classList.remove('selected'));
+      d.classList.add('selected');
+    };
+    grid.appendChild(d);
+  });
+}
+
+initColDotGrid();
+updateStatusDropdowns();
 </script>
 </body>
 </html>
